@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Creator!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        h1 {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        #instructions {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            text-align: center;
+            font-size: 1.2em;
+            line-height: 1.4;
+        }
+        #game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 90vw;
+        }
+        #palette {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .color-btn:hover, .color-btn.selected {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .color-btn:nth-child(1) { background: #ff6b6b; }
+        .color-btn:nth-child(2) { background: #4ecdc4; }
+        .color-btn:nth-child(3) { background: #45b7d1; }
+        .color-btn:nth-child(4) { background: #96ceb4; }
+        .color-btn:nth-child(5) { background: #feca57; }
+        #pattern-area {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 5px;
+            background: white;
+            border: 3px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .cell.animated {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #4ecdc4;
+            min-height: 30px;
+        }
+        @media (max-width: 600px) {
+            .cell {
+                width: 50px;
+                height: 50px;
+                margin: 3px;
+            }
+            .color-btn {
+                width: 40px;
+                height: 40px;
+                margin: 3px;
+            }
+            h1 { font-size: 2em; }
+            #instructions { font-size: 1em; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pattern Creator!</h1>
+    <div id="instructions">
+        Welcome to Pattern Creator! Create beautiful patterns by selecting colors from the palette and clicking on the circles below. 
+        Try to make a repeating pattern, like red-blue-red-blue! Use the buttons to clear, get random colors, or play your pattern with fun sounds.
+        Be creative and have fun learning about patterns!
+    </div>
+    <div id="game">
+        <div id="palette">
+            <button class="color-btn" data-color="#ff6b6b"></button>
+            <button class="color-btn" data-color="#4ecdc4"></button>
+            <button class="color-btn" data-color="#45b7d1"></button>
+            <button class="color-btn" data-color="#96ceb4"></button>
+            <button class="color-btn" data-color="#feca57"></button>
+        </div>
+        <div id="pattern-area"></div>
+        <div id="controls">
+            <button onclick="clearPattern()">Clear</button>
+            <button onclick="randomPattern()">Random</button>
+            <button onclick="playPattern()">Play Pattern</button>
+        </div>
+        <div id="feedback"></div>
+    </div>
+    <script>
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+        let selectedColor = colors[0];
+        const numCells = 12;
+        let cells = [];
+        let audioContext;
+
+        // Initialize audio context for sounds
+        function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Simple beep sound
+        function playBeep(frequency = 440, duration = 200) {
+            if (!audioContext) initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        // Create cells
+        function createCells() {
+            const area = document.getElementById('pattern-area');
+            area.innerHTML = '';
+            cells = [];
+            for (let i = 0; i < numCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.background = 'white';
+                cell.onclick = () => setCellColor(cell);
+                area.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        // Set cell color
+        function setCellColor(cell) {
+            const index = cells.indexOf(cell);
+            if (index !== -1) {
+                cell.style.background = selectedColor;
+                playBeep(300 + index * 50, 100); // Vary pitch by position
+            }
+        }
+
+        // Palette selection
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                selectedColor = e.target.dataset.color;
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+                e.target.classList.add('selected');
+            };
+        });
+
+        // Clear pattern
+        function clearPattern() {
+            cells.forEach(cell => {
+                cell.style.background = 'white';
+            });
+            document.getElementById('feedback').textContent = 'Pattern cleared! Start creating!';
+            playBeep(200, 300);
+        }
+
+        // Random pattern
+        function randomPattern() {
+            cells.forEach(cell => {
+                cell.style.background = colors[Math.floor(Math.random() * colors.length)];
+            });
+            document.getElementById('feedback').textContent = 'Random pattern generated! Try to spot the repeats or modify it.';
+            playBeep(400, 200);
+        }
+
+        // Play pattern with animation and sounds
+        function playPattern() {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = 'Playing your pattern...';
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < cells.length) {
+                    const cell = cells[index];
+                    cell.classList.add('animated');
+                    const bgColor = window.getComputedStyle(cell).backgroundColor;
+                    // Simple color-based frequency
+                    let freq = 300;
+                    if (bgColor.includes('red')) freq = 400;
+                    else if (bgColor.includes('green')) freq = 500;
+                    else if (bgColor.includes('blue')) freq = 600;
+                    else if (bgColor.includes('yellow')) freq = 700;
+                    playBeep(freq, 300);
+                    setTimeout(() => cell.classList.remove('animated'), 500);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    feedback.textContent = 'Great pattern! Try making it repeat more.';
+                    playBeep(800, 500);
+                }
+            }, 400);
+        }
+
+        // Initialize game
+        initAudio();
+        createCells();
+        document.querySelector('.color-btn').classList.add('selected'); // Default selection
+    </script>
+</body>
+</html>

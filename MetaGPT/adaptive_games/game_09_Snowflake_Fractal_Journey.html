@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowflake Fractal Journey</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #container {
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+        .screen {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1, h2 {
+            color: #01579b;
+        }
+        canvas {
+            border: 2px solid #4fc3f7;
+            border-radius: 10px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+        .big-btn {
+            background: #4fc3f7;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            min-width: 150px;
+            transition: background 0.3s;
+        }
+        .big-btn:hover, .big-btn:focus {
+            background: #29b6f6;
+            outline: 3px solid #0277bd;
+        }
+        .option-btn {
+            background: #81c784;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+        .option-btn:hover, .option-btn:focus {
+            background: #66bb6a;
+            transform: scale(1.05);
+            outline: 2px solid #4caf50;
+        }
+        .option-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .option-btn.correct {
+            background: #4caf50;
+            animation: pulse 0.6s ease-in-out;
+        }
+        .option-btn.wrong {
+            background: #ef5350;
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        #progress {
+            font-weight: bold;
+            color: #0277bd;
+            font-size: 16px;
+        }
+        #options {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #feedback {
+            min-height: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #nextBtn {
+            background: #4caf50;
+        }
+        #nextBtn:hover, #nextBtn:focus {
+            background: #45a049;
+        }
+        @media (max-width: 600px) {
+            #header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .option-btn {
+                min-width: 100%;
+                margin: 5px 0;
+            }
+            #options {
+                flex-direction: column;
+                align-items: center;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="welcome" class="screen">
+            <h1>Snowflake Fractal Journey</h1>
+            <p>This is game 9 of 10 in your fractal learning adventure! The Koch snowflake starts as an equilateral triangle (stage 0). In each stage, replace the middle third of every side with two sides of a smaller equilateral triangle pointing outward.</p>
+            <p>Learning Goal: Recognize stages and apply the iterative rules to build the fractal.</p>
+            <p>Success: Complete all levels with correct choices. You'll get instant feedback and celebrations!</p>
+            <button id="startBtn" class="big-btn">Start Journey</button>
+        </div>
+        <div id="game" class="screen" style="display: none;">
+            <div id="header">
+                <h2 id="levelTitle"></h2>
+                <div id="progress"></div>
+            </div>
+            <canvas id="canvas" aria-label="Canvas displaying Koch snowflake fractals for the current challenge" tabindex="0"></canvas>
+            <div id="feedback" role="status" aria-live="polite"></div>
+            <div id="options"></div>
+            <button id="nextBtn" class="big-btn" style="display: none;">Next Challenge</button>
+        </div>
+        <div id="end" class="screen" style="display: none;">
+            <h1>Congratulations! 🎉</h1>
+            <p>You've mastered the Koch snowflake sequence! Your fractal journey is almost complete—get ready for advanced pattern creation in the final game.</p>
+            <p>Remember: Each iteration adds beauty and complexity by applying the rule perfectly.</p>
+            <button id="replayBtn" class="big-btn">Replay Journey</button>
+        </div>
+    </div>
+    <script>
+        // Audio setup
+        let audioCtx;
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                // Audio not supported, graceful degradation
+            }
+        }
+        function playDing() {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = 800;
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            oscillator.type = 'sine';
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.2);
+        }
+        function playBuzz() {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = 200;
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.type = 'square';
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() {
+            const maxW = Math.min(window.innerWidth * 0.95, 800);
+            canvas.width = maxW;
+            canvas.height = maxW * 0.8;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        // Drawing functions
+        function drawKoch(ctx, start, end, order, angleOffset = Math.PI / 3) {
+            if (order === 0) {
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                return;
+            }
+            const thirdX = (end.x - start.x) / 3;
+            const thirdY = (end.y - start.y) / 3;
+            const mid1 = { x: start.x + thirdX, y: start.y + thirdY };
+            const mid2 = { x: start.x + 2 * thirdX, y: start.y + 2 * thirdY };
+            const thirdLen = Math.hypot(end.x - start.x, end.y - start.y) / 3;
+            const dirAngle = Math.atan2(end.y - start.y, end.x - start.x);
+            const peakAngle = dirAngle + angleOffset;
+            const peak = {
+                x: mid1.x + thirdLen * Math.cos(peakAngle),
+                y: mid1.y + thirdLen * Math.sin(peakAngle)
+            };
+            drawKoch(ctx, start, mid1, order - 1, angleOffset);
+            drawKoch(ctx, mid1, peak, order - 1, angleOffset);
+            drawKoch(ctx, peak, mid2, order - 1, angleOffset);
+            drawKoch(ctx, mid2, end, order - 1, angleOffset);
+        }
+        function drawSnowflake(ctx, order, cx, cy, size, angleOffset = Math.PI / 3) {
+            const h = size * Math.sqrt(3) / 2;
+            const offsetY = h / 3;
+            const p1 = { x: cx - size / 2, y: cy + offsetY };
+            const p2 = { x: cx + size / 2, y: cy + offsetY };
+            const p3 = { x: cx, y: cy + offsetY - h };
+            ctx.strokeStyle = '#01579b';
+            ctx.lineWidth = Math.max(1, size / 50);
+            ctx.lineCap = 'round';
+            drawKoch(ctx, p1, p2, order, angleOffset);
+            drawKoch(ctx, p2, p3, order,

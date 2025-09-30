@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Spotter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #f0f8ff;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover, button:focus {
+            background-color: #45a049;
+            outline: 2px solid #333;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #canvas {
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #333;
+            background-color: white;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #question {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        #buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        #buttons button {
+            flex: 1 1 100px;
+            min-width: 100px;
+            max-width: 150px;
+            padding: 15px;
+            font-size: 18px;
+        }
+        #feedback {
+            text-align: center;
+            font-size: 20px;
+            min-height: 40px;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        #progress {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #34495e;
+        }
+        #welcome, #game, #end {
+            text-align: center;
+        }
+        #welcome p, #end p {
+            font-size: 16px;
+            margin: 15px 0;
+        }
+        @media (max-width: 600px) {
+            #buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            #buttons button {
+                width: 80%;
+                max-width: 250px;
+            }
+            #canvas {
+                margin: 10px auto;
+            }
+            body {
+                padding: 5px;
+            }
+        }
+        .hidden {
+            display: none !important;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome" role="main">
+        <h1>Polygon Spotter</h1>
+        <p><strong>Learning Objective:</strong> Recognize regular polygons by counting their number of sides, from triangle (3 sides) to decagon (10 sides).</p>
+        <p><strong>Instructions:</strong> In each level, a regular polygon will appear on the canvas. Count the sides carefully and click the button with the correct number. You'll get immediate feedback. Complete all 8 levels to win!</p>
+        <p>Tip: Regular polygons have all sides and angles equal. Have fun spotting them!</p>
+        <button id="startBtn">Start Game</button>
+    </div>
+    <div id="game" class="hidden">
+        <div id="progress"></div>
+        <canvas id="canvas" width="400" height="320" aria-label="Canvas where the regular polygon is drawn for identification"></canvas>
+        <p id="question">How many sides does this polygon have?</p>
+        <div id="buttons"></div>
+        <div id="feedback" aria-live="polite"></div>
+    </div>
+    <div id="end" class="hidden">
+        <h2>Congratulations! 🎉</h2>
+        <p>You've spotted all the polygons! This builds your understanding of polygon patterns.</p>
+        <p id="scoreText"></p>
+        <button id="replayBtn">Play Again</button>
+    </div>
+    <script>
+        const polygons = [
+            { sides: 3, name: 'Triangle' },
+            { sides: 4, name: 'Quadrilateral' },
+            { sides: 5, name: 'Pentagon' },
+            { sides: 6, name: 'Hexagon' },
+            { sides: 7, name: 'Heptagon' },
+            { sides: 8, name: 'Octagon' },
+            { sides: 9, name: 'Nonagon' },
+            { sides: 10, name: 'Decagon' }
+        ];
+        let currentLevel = 0;
+        let score = 0;
+        let hasWrong = false;
+        let audioCtx;
+        let canvas, ctx, buttonsDiv, feedbackDiv, progressDiv, questionDiv, gameDiv, welcomeDiv, endDiv, startBtn, replayBtn;
+        function init() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            buttonsDiv = document.getElementById('buttons');
+            feedbackDiv = document.getElementById('feedback');
+            progressDiv = document.getElementById('progress');
+            questionDiv = document.getElementById('question');
+            gameDiv = document.getElementById('game');
+            welcomeDiv = document.getElementById('welcome');
+            endDiv = document.getElementById('end');
+            startBtn = document.getElementById('startBtn');
+            replayBtn = document.getElementById('replayBtn');
+            startBtn.addEventListener('click', startGame);
+            replayBtn.addEventListener('click', replay);
+            // Audio setup with error handling
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported, continuing silently.');
+            }
+            // Responsive canvas sizing
+            function resizeCanvas() {
+                const maxSize = Math.min(window.innerWidth - 40, 500);
+                canvas.width = maxSize;
+                canvas.height = maxSize * 0.8;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            // Create number buttons
+            for (let i = 3; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = `${i} sides`;
+                btn.dataset.sides = i;
+                btn.addEventListener('click', handleClick);
+                btn.setAttribute('aria-label', `Select ${i} sides`);
+                buttonsDiv.appendChild(btn);
+            }
+        }
+        function startGame() {
+            welcomeDiv.classList.add('hidden');
+            gameDiv.classList.remove('hidden');
+            currentLevel = 0;
+            score = 0;
+            nextLevel();
+        }
+        function replay() {
+            endDiv.classList.add('hidden');
+            gameDiv.classList.remove('hidden');
+            currentLevel = 0;
+            score = 0;
+            nextLevel();
+        }
+        function nextLevel() {
+            if (currentLevel >= polygons.length) {
+                endGame();
+                return;
+            }
+            hasWrong = false;
+            const poly = polygons[currentLevel];
+            progressDiv.textContent = `Level ${currentLevel + 1} of ${polygons.length}: Spot the ${poly.name}!`;
+            questionDiv.textContent = 'How many sides does this polygon have?';
+            feedbackDiv.textContent = '';
+            feedbackDiv.style.color = '';
+            buttonsDiv.classList.remove('shake');
+            // Clear and draw polygon
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPolygon(poly.sides);
+            currentLevel++;
+        }
+        function drawPolygon(sides) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.7;
+            const rotation = Math.random() * Math.PI * 2;
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2 + rotation - Math.PI / 2; // Start from top
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            // Random pastel color for fun
+            const hue = Math.random() * 360;
+            ctx.fillStyle = `hsl(${hue}, 50%, 85%)`;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.fill();
+            ctx.stroke();
+        }
+        function handleClick(e) {
+            const clickedSides = parseInt(e.target.dataset.sides);
+            const poly = polygons[currentLevel - 1];
+            if (clickedSides === poly.sides) {
+                correct(poly);
+            } else {
+                wrong(poly);
+            }
+        }
+        function correct(poly) {
+            playSound(800, 200); // Success sound
+            const isFirstTry = !hasWrong;
+            if (isFirstTry) score++;
+            feedbackDiv.innerHTML = `Correct! ${isFirstTry ? 'Perfect on the first try! ' : ''}This is a <strong>${poly.name}</strong> with ${poly.sides} sides. Great job! 🎉`;
+            feedbackDiv.style.color = 'green';
+            feedbackDiv.style.backgroundColor = '#d4edda';
+            // Celebrate: Redraw with green stroke and slight scale animation simulation
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(1.05, 1.05);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            drawPolygon(poly.sides);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+            ctx.restore();
+            setTimeout(() => {
+                nextLevel();
+            }, 2500);
+        }
+        function wrong(poly) {
+            playSound(400, 300); // Error sound
+            hasWrong = true;
+            feedbackDiv.textContent = `Oops! Not ${e.target.textContent}. This polygon has ${poly.sides} sides. Keep counting!`;
+            feedbackDiv.style.color = 'red';
+            feedbackDiv.style.backgroundColor = '#f8d7da';
+            // Shake buttons container
+            buttonsDiv.classList.add('shake');
+            // Highlight correct button briefly
+            const correctBtn = buttonsDiv.querySelector(`[data-sides="${poly.sides}"]`);
+            if (correctBtn) {
+                const originalBg = correctBtn.style.backgroundColor;
+                const originalColor = correctBtn.style.color;
+                correctBtn.style.backgroundColor = '#ffeb3b';
+                correctBtn.style.color = 'black';
+                setTimeout(() => {
+                    correctBtn.style.backgroundColor = originalBg;
+                    correctBtn.style.color = originalColor;
+                }, 1500);
+            }
+        }
+        function endGame() {
+            gameDiv.classList.add('hidden');
+            endDiv.classList.remove('hidden');
+            const total = polygons.length;
+            const scoreText = document.getElementById('scoreText');
+            let message = `Score: ${score} out of ${total} correct on the first try!`;
+            if (score === total) {
+                message += ' You are a polygon pro! 🌟';
+            } else {
+                message += ' Awesome effort—practice makes perfect!';
+            }
+            scoreText.innerHTML = message;
+        }
+        function playSound(frequency, duration) {
+            if (!audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + duration / 1000);
+            } catch (e) {
+                console.log('Sound playback failed:', e);
+            }
+        }
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

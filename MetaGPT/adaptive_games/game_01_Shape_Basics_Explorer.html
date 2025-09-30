@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Basics Explorer</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            color: #333;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+        h1, h2 {
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 10px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #progress {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .shape-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            min-height: 150px;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+        }
+        .option {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            min-width: 80px;
+        }
+        .option:hover {
+            border-color: #4CAF50;
+            transform: scale(1.05);
+        }
+        .option.selected {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+        .option.correct {
+            border-color: #4CAF50;
+            background: #d4edda;
+            animation: pulse 0.5s ease;
+        }
+        .option.incorrect {
+            border-color: #f8d7da;
+            background: #f5c6cb;
+            animation: shake 0.5s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .feedback {
+            font-size: 1.3em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .celebration {
+            font-size: 2em;
+            color: #FFD700;
+            animation: bounce 1s infinite;
+            display: none;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            #game-container {
+                padding: 10px;
+            }
+            h1, h2 {
+                font-size: 1.5em;
+            }
+            p {
+                font-size: 1em;
+            }
+            button {
+                padding: 12px 20px;
+                font-size: 1em;
+                width: 90%;
+                margin: 5px 0;
+            }
+            .option {
+                display: block;
+                margin: 10px auto;
+                width: 90%;
+            }
+        }
+        /* Accessibility: High contrast, focus styles */
+        button:focus, .option:focus {
+            outline: 3px solid #4CAF50;
+        }
+        /* Hide offscreen for screen readers if needed */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" role="main">
+        <!-- Welcome Screen -->
+        <div id="welcome" class="screen active" role="dialog" aria-labelledby="welcome-title">
+            <h1 id="welcome-title">Shape Basics Explorer</h1>
+            <p>Welcome, young explorer! I'm Geo, your guide to the amazing world of geometry.</p>
+            <p>Geometry is the study of shapes and their patterns. Today, we'll explore basic 1D lines, 2D shapes like circles and squares, and 3D shapes like cubes and spheres.</p>
+            <p>Our goal: Identify shapes and spot simple patterns to build your confidence!</p>
+            <p>Click shapes or choose options to answer. You'll get instant feedback. Let's start the adventure!</p>
+            <button onclick="startGame()" aria-label="Start the game">Begin Exploration!</button>
+        </div>
+        <!-- Game Screen -->
+        <div id="game" class="screen" role="game">
+            <h2 id="level-title"></h2>
+            <div id="progress">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="question" class="sr-only" aria-live="polite"></div>
+            <div class="shape-container" id="shape-display"></div>
+            <div id="options"></div>
+            <div id="feedback" class="feedback"></div>
+            <button id="next-btn" onclick="nextChallenge()" disabled aria-label="Next challenge">Next Challenge</button>
+        </div>
+        <!-- End Screen -->
+        <div id="end" class="screen" role="dialog" aria-labelledby="end-title">
+            <h1 id="end-title">Exploration Complete!</h1>
+            <p id="end-message">You did amazing! You've learned the basics of shapes and patterns in geometry.</p>
+            <p>This builds toward more exciting adventures in our 10-game sequence.</p>
+            <div id="celebration" class="celebration">🎉 Great Job! 🎉</div>
+            <button onclick="replayGame()" aria-label="Play again">Explore Again</button>
+            <button onclick="startGame()" aria-label="Start next game (coming soon)">Next Adventure</button>
+        </div>
+    </div>
+    <script>
+        // Game state
+        let currentLevel = 0;
+        let score = 0;
+        let totalChallenges = 0;
+        let challenges = [];
+        let audioContext; // For sound effects
+        // Initialize Web Audio for sounds
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        // Sound effects using Web Audio API
+        function playSound(frequency, duration, type = 'sine') {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        function playCorrectSound() {
+            playSound(523.25, 0.2); // C5 note
+        }
+        function playIncorrectSound() {
+            playSound(349.23, 0.2, 'square'); // F4 buzz
+        }
+        function playCelebrationSound() {
+            playSound(659.25, 0.1); // E5
+            setTimeout(() => playSound(783.99, 0.1), 100); // G5
+            setTimeout(() => playSound(523.25, 0.3), 200); // C5
+        }
+        // Define challenges: Progressive from identification to patterns
+        // Level 1: 2D shapes identification (click or choose)
+        // Level 2: 3D shapes
+        // Level 3: Simple patterns (1D/2D sequences)
+        function generateChallenges() {
+            challenges = [
+                // Level 1: 2D Shapes (3 challenges)
+                {
+                    question: "What 2D shape is this?",
+                    shape: 'circle',
+                    options: ['Circle', 'Square', 'Triangle'],
+                    correct: 0,
+                    type: 'identification'
+                },
+                {
+                    question: "What 2D shape is this?",
+                    shape: 'square',
+                    options: ['Circle', 'Square', 'Rectangle'],
+                    correct: 1,
+                    type: 'identification'
+                },
+                {
+                    question: "What 2D shape is this?",
+                    shape: 'triangle',
+                    options: ['Triangle', 'Square', 'Circle'],
+                    correct: 0,
+                    type: 'identification'
+                },
+                // Level 2: 3D Shapes (3 challenges)
+                {
+                    question: "What 3D shape is this?",
+                    shape: 'cube',
+                    options: ['Sphere', 'Cube', 'Cylinder'],
+                    correct: 1,
+                    type: 'identification'
+                },
+                {
+                    question: "What 3D shape is this?",
+                    shape: 'sphere',
+                    options: ['Cube', 'Sphere', 'Pyramid'],
+                    correct: 1,
+                    type: 'identification'
+                },
+                {
+                    question: "What 3D shape is this?",
+                    shape: 'cylinder',
+                    options: ['Cylinder', 'Cube', 'Sphere'],
+                    correct: 0,
+                    type: 'identification'
+                },
+                // Level 3: Simple Patterns (3 challenges) - e.g., sequence of shapes, choose next
+                {
+                    question: "What's next in this pattern? Line - Circle - Line - ?",
+                    pattern: ['line', 'circle', 'line'],
+                    options: ['Circle', 'Line', 'Square'],
+                    correct: 0, // Alternating line-circle
+                    type: 'pattern'
+                },
+                {
+                    question: "What's next? Square - Triangle - Square - ?",
+                    pattern: ['square', 'triangle', 'square'],
+                    options: ['Triangle', 'Square', 'Circle'],
+                    correct: 0,
+                    type: 'pattern'
+                },
+                {
+                    question: "What's next in 3D? Cube - Sphere - Cube - ?",
+                    pattern: ['cube', 'sphere', 'cube'],
+                    options: ['Sphere', 'Cube', 'Cylinder'],
+                    correct: 0,
+                    type: 'pattern'
+                }
+            ];
+            totalChallenges = challenges.length;
+        }
+        // Draw shapes using SVG
+        function drawShape(shapeType, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('aria-label', `Shape: ${shapeType}`);
+            let path;
+            switch (shapeType) {
+                case 'circle':
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    path.setAttribute('cx', '50');
+                    path.setAttribute('cy', '50');
+                    path.setAttribute('r', '40');
+                    path.setAttribute('fill', '#4CAF50');
+                    break;
+                case 'square':
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    path.setAttribute('x', '20');
+                    path.setAttribute('y', '20');
+                    path.setAttribute('width', '60');
+                    path.setAttribute('height', '60');
+                    path.setAttribute('fill', '#2196F3');
+                    break;
+                case 'triangle':
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    path.setAttribute('points', '50,10 90,90 10,90');
+                    path.setAttribute('fill', '#FF9800');
+                    break;
+                case 'cube':
+                    // Simple 3D projection
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    path.setAttribute('points', '30,30 70,30 70,50 50,50 50,70 30,70');
+                    path.setAttribute('fill', '#9C27B0');
+                    svg.appendChild(path);
+                    const back = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    back.setAttribute('points', '20,20 60,20 60,40 40,40 40,60 20,60');
+                    back.setAttribute('fill', '#9C27B0');
+                    back.setAttribute('opacity', '0.7');
+                    svg.appendChild(back);
+                    break;
+                case 'sphere':
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    path.setAttribute('cx', '50');
+                    path.setAttribute('cy', '50');
+                    path.setAttribute('r', '40');
+                    path.setAttribute('fill', '#E91E63');
+                    // Add gradient for 3D feel
+                    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+                    grad.setAttribute('id', 'sphereGrad');
+                    grad.innerHTML = '<stop offset="0%" stop-color="#FFEBEE"/><stop offset="100%" stop-color="#E91E63"/>';
+                    defs.appendChild(grad);
+                    path.setAttribute('fill', 'url(#sphereGrad)');
+                    svg.appendChild(defs);
+                    break;
+                case 'cylinder':
+                    // Side view
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    path.setAttribute('x', '30');
+                    path.setAttribute('y', '20');
+                    path.setAttribute('width', '40');
+                    path.setAttribute('height', '60');
+                    path.setAttribute('rx', '20');
+                    path.setAttribute('fill', '#00BCD4');
+                    const top = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+                    top.setAttribute('cx', '50');
+                    top.setAttribute('cy', '20');
+                    top.setAttribute('rx', '20');
+                    top.setAttribute('ry', '5');
+                    top.setAttribute('fill', '#00BCD4');
+                    svg.appendChild(top);
+                    const bottom = top.cloneNode();
+                    bottom.setAttribute('cy', '80');
+                    svg.appendChild(bottom);
+                    svg.appendChild(path);
+                    break;
+                case 'line':
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    path.setAttribute('x1', '10');
+                    path.setAttribute('y1', '50');
+                    path.setAttribute('x2', '90');
+                    path.setAttribute('y2', '50');
+                    path.setAttribute('stroke', '#F44336');
+                    path.setAttribute('stroke-width', '4');
+                    break;
+                default:
+                    path = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    path.setAttribute('x', '50');
+                    path.setAttribute('y', '55');
+                    path.textContent = '?';
+                    path.setAttribute('font-size', '50');
+                    path.setAttribute('fill', '#999');
+            }
+            if (shapeType !== 'cube' && shapeType !== 'cylinder' && shapeType !== 'line') {
+                svg.appendChild(path);
+            } else if (shapeType === 'line') {
+                svg.appendChild(path);
+            }
+            container.appendChild(svg);
+        }
+        // Draw pattern sequence
+        function drawPattern(pattern, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const svgWrapper = document.createElement('div');
+            svgWrapper.style.display = 'flex';
+            svgWrapper.style.justifyContent = 'space-around';
+            svgWrapper.style.width = '100%';
+            pattern.forEach((shape, index)

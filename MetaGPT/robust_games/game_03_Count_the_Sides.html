@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count the Sides!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        #game {
+            max-width: 90vw;
+            max-width: 400px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF4500;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #32CD32;
+            font-size: 1.5em;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.4;
+        }
+        #score {
+            font-size: 1.5em;
+            color: #FF69B4;
+            margin: 10px 0;
+        }
+        #shape {
+            width: min(80vw, 250px);
+            height: auto;
+            border: 3px solid #333;
+            border-radius: 10px;
+            background: white;
+            margin: 20px auto;
+            display: block;
+        }
+        #options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            min-width: 60px;
+            touch-action: manipulation;
+        }
+        button:hover, button:active {
+            background: linear-gradient(to bottom, #FFA500, #FF8C00);
+            transform: scale(1.05);
+        }
+        #next {
+            background: linear-gradient(to bottom, #32CD32, #228B22);
+            color: white;
+            font-size: 1.3em;
+            padding: 15px 30px;
+        }
+        #start, #restart {
+            background: linear-gradient(to bottom, #FF69B4, #FF1493);
+            color: white;
+            font-size: 1.3em;
+            padding: 15px 30px;
+        }
+        #feedback {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 10px 0;
+            min-height: 30px;
+        }
+        @media (max-width: 480px) {
+            #game {
+                padding: 15px;
+                margin: 10px;
+            }
+            button {
+                padding: 12px 15px;
+                font-size: 1em;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>Count the Sides!</h1>
+        <div id="instructions">
+            <p>Welcome to Count the Sides! This game helps you learn how many sides different polygons have.</p>
+            <p>Look at the shape and click the button with the correct number of sides. Get all 10 correct to win!</p>
+            <p>Polygons have 3 to 8 sides: triangle (3), quadrilateral (4), pentagon (5), hexagon (6), heptagon (7), octagon (8).</p>
+            <button id="start">Start Game</button>
+        </div>
+        <div id="gameScreen" style="display:none;">
+            <div id="score">Score: 0/0</div>
+            <svg id="shape" viewBox="0 0 200 200"></svg>
+            <div id="options"></div>
+            <div id="feedback"></div>
+            <button id="next" style="display:none;">Next Shape</button>
+        </div>
+        <div id="endScreen" style="display:none;">
+            <h2>Congratulations!</h2>
+            <p>You got <span id="finalScore"></span> out of 10 correct!</p>
+            <button id="restart">Play Again</button>
+        </div>
+    </div>
+    <script>
+        let audioCtx;
+        let score = 0;
+        let questionCount = 0;
+        const totalQuestions = 10;
+        let currentSides;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(frequency, duration) {
+            if (!audioCtx) return;
+            try {
+                let oscillator = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = 0.1;
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                }, duration);
+            } catch (e) {
+                // Ignore audio errors for compatibility
+            }
+        }
+
+        function generatePolygon(sides, size = 80, cx = 100, cy = 100) {
+            let points = [];
+            for (let i = 0; i < sides; i++) {
+                let angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+                let x = cx + size * Math.cos(angle);
+                let y = cy + size * Math.sin(angle);
+                points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+            }
+            let hue = Math.random() * 360;
+            return `<polygon points="${points.join(' ')}" fill="hsl(${hue}, 70%, 60%)" stroke="black" stroke-width="3"/>`;
+        }
+
+        function generateQuestion() {
+            currentSides = Math.floor(Math.random() * 6) + 3; // 3 to 8
+            let svg = document.getElementById('shape');
+            svg.innerHTML = generatePolygon(currentSides);
+            let optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            for (let i = 3; i <= 8; i++) {
+                let btn = document.createElement('button');
+                btn.textContent = i;
+                btn.onclick = () => checkAnswer(i);
+                optionsDiv.appendChild(btn);
+            }
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('feedback').style.color = '';
+            document.getElementById('next').style.display = 'none';
+        }
+
+        function checkAnswer(selected) {
+            let feedback = document.getElementById('feedback');
+            if (selected === currentSides) {
+                feedback.innerHTML = 'Correct! 🎉';
+                feedback.style.color = 'green';
+                score++;
+                playSound(800, 200);
+            } else {
+                feedback.innerHTML = `Oops! It's ${currentSides} sides. Try again!`;
+                feedback.style.color = 'red';
+                playSound(400, 200);
+            }
+            questionCount++;
+            updateScore();
+            if (questionCount >= totalQuestions) {
+                setTimeout(endGame, 1500);
+            } else {
+                document.getElementById('next').style.display = 'block';
+            }
+            // Disable buttons
+            let buttons = document.querySelectorAll('#options button');
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}/${questionCount}`;
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('endScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+            playSound(600, 500);
+        }
+
+        document.getElementById('start').onclick = () => {
+            initAudio();
+            score = 0;
+            questionCount = 0;
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            updateScore();
+            generateQuestion();
+        };
+
+        document.getElementById('next').onclick = () => {
+            let buttons = document.querySelectorAll('#options button');
+            buttons.forEach(btn => btn.disabled = false);
+            generateQuestion();
+        };
+
+        document.getElementById('restart').onclick = () => {
+            score = 0;
+            questionCount = 0;
+            document.getElementById('endScreen').style.display = 'none';
+            document.getElementById('instructions').style.display = 'block';
+        };
+    </script>
+</body>
+</html>

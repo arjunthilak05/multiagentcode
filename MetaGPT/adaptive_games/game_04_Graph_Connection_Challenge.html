@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Connection Challenge</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: auto;
+        }
+        #gameContainer {
+            max-width: 90vw;
+            max-height: 90vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        p {
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:hover, button:focus {
+            background: #38a169;
+            outline: 2px solid #2f855a;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #welcome {
+            animation: fadeIn 0.5s ease-in;
+        }
+        #game {
+            animation: slideUp 0.5s ease-out;
+        }
+        #levelInfo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        #progress {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        #progressBar {
+            height: 100%;
+            background: #48bb78;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        #graph {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f7fafc;
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+        #feedback {
+            min-height: 40px;
+            font-size: 16px;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .success { background: #c6f6d5; color: #22543d; }
+        .error { background: #fed7d7; color: #742a2a; }
+        .info { background: #bee3f8; color: #2a4365; }
+        .celebration {
+            font-size: 24px;
+            color: #38a169;
+            animation: celebrate 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .vertex {
+            fill: #4299e1;
+            stroke: #2b6cb0;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: fill 0.2s, transform 0.1s;
+            r: 15;
+        }
+        .vertex:hover, .vertex:focus {
+            fill: #3182ce;
+            transform: scale(1.2);
+        }
+        .vertex.selected {
+            fill: #ecc94b;
+            stroke: #d69e2e;
+        }
+        .edge {
+            stroke: #2f855a;
+            stroke-width: 3;
+            stroke-linecap: round;
+            animation: drawEdge 0.3s ease-out;
+        }
+        @keyframes drawEdge {
+            from { stroke-dasharray: 5; stroke-dashoffset: 5; }
+            to { stroke-dasharray: none; }
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            #gameContainer {
+                padding: 10px;
+                margin: 10px;
+            }
+            #graph {
+                width: 300px;
+                height: 300px;
+            }
+            .vertex { r: 12; }
+            button { padding: 10px 20px; font-size: 14px; }
+        }
+        /* Accessibility high contrast */
+        @media (prefers-contrast: high) {
+            body { background: #000; color: #fff; }
+            #gameContainer { background: #fff; }
+            .vertex { fill: #000; stroke: #fff; }
+            .edge { stroke: #000; }
+        }
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Welcome Screen -->
+        <div id="welcome">
+            <h1>Graph Connection Challenge</h1>
+            <p>Welcome to Game 4 in our geometry adventure! Today, you'll learn about <strong>complete graphs (Kn)</strong>. A complete graph Kn has n dots (vertices) where <em>every dot is connected to every other dot</em> by a line (edge). No duplicates!</p>
+            <p><strong>Learning Goal:</strong> Build and identify complete graphs from K2 to K6. Success means connecting all pairs correctly!</p>
+            <p>How to play: Click two dots to draw a line between them. Connect all pairs to complete the graph. You'll get feedback right away. Let's build some graphs!</p>
+            <button id="startBtn" tabindex="0">Start Adventure!</button>
+        </div>
+        <!-- Game Screen -->
+        <div id="gameScreen" style="display: none;">
+            <div id="levelInfo">
+                <div>Level <span id="currentLevel">1</span> of 5: Build K<span id="graphN">2</span></div>
+                <div id="progress">
+                    <div id="progressBar"></div>
+                </div>
+                <div id="instruction">Click two dots to connect them. Connect all pairs!</div>
+            </div>
+            <svg id="graphSvg" width="400" height="400" role="img" aria-label="Graph drawing area"></svg>
+            <div id="feedback" class="info" role="status" aria-live="polite">Ready to connect!</div>
+            <button id="nextBtn" style="display: none;" disabled>Next Level</button>
+            <button id="replayBtn" style="display: none;">Replay Level</button>
+            <button id="replayGameBtn" style="display: none;">Play Again</button>
+        </div>
+    </div>
+    <script>
+        // Game State
+        let currentLevel = 1;
+        const totalLevels = 5;
+        let n = 2; // Starts at K2
+        let vertices = [];
+        let edges = new Set(); // Store sorted pairs as 'i-j'
+        let selectedVertex = null;
+        let audioContext = null;
+        let isGameComplete = false;
+        // Elements
+        const welcome = document.getElementById('welcome');
+        const gameScreen = document.getElementById('gameScreen');
+        const levelInfo = document.getElementById('levelInfo');
+        const currentLevelEl = document.getElementById('currentLevel');
+        const graphNEl = document.getElementById('graphN');
+        const progressBar = document.getElementById('progressBar');
+        const graphSvg = document.getElementById('graphSvg');
+        const feedback = document.getElementById('feedback');
+        const nextBtn = document.getElementById('nextBtn');
+        const replayBtn = document.getElementById('replayBtn');
+        const replayGameBtn = document.getElementById('replayGameBtn');
+        const startBtn = document.getElementById('startBtn');
+        // Initialize Audio for feedback (graceful degradation if not supported)
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        function playSound(frequency, duration = 0.2) {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        function playSuccessSound() {
+            playSound(523, 0.1); // C5
+            setTimeout(() => playSound(659, 0.1), 100); // E5
+            setTimeout(() => playSound(784, 0.3), 200); // G5
+        }
+        function playConnectSound() {
+            playSound(440, 0.1); // A4
+        }
+        function playErrorSound() {
+            playSound(220, 0.2); // A3 low
+        }
+        // Generate vertex positions in a circle
+        function generateVertices(n) {
+            const radius = 150;
+            const centerX = 200;
+            const centerY = 200;
+            vertices = [];
+            for (let i = 0; i < n; i++) {
+                const angle = (i / n) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push({ id: i, x, y });
+            }
+        }
+        // Draw vertices
+        function drawVertices() {
+            graphSvg.innerHTML = ''; // Clear
+            vertices.forEach((v, i) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('class', 'vertex');
+                circle.setAttribute('cx', v.x);
+                circle.setAttribute('cy', v.y);
+                circle.setAttribute('tabindex', '0');
+                circle.setAttribute('role', 'button');
+                circle.setAttribute('aria-label', `Vertex ${i + 1}`);
+                circle.addEventListener('click', (e) => selectVertex(i, e));
+                circle.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') selectVertex(i, e); e.preventDefault(); });
+                graphSvg.appendChild(circle);
+            });
+            drawEdges();
+        }
+        // Select vertex for connection
+        function selectVertex(index, event) {
+            event.preventDefault();
+            const circles = graphSvg.querySelectorAll('.vertex');
+            circles.forEach(c => c.classList.remove('selected'));
+            if (selectedVertex === null) {
+                selectedVertex = index;
+                circles[index].classList.add('selected');
+                feedback.textContent = `Selected vertex ${index + 1}. Click another!`;
+                feedback.className = 'info';
+                playSound(392, 0.1); // G4
+            } else if (selectedVertex === index) {
+                selectedVertex = null;
+                feedback.textContent = 'Selection cleared.';
+                playSound(220, 0.1);
+            } else {
+                connectVertices(selectedVertex, index);
+            }
+        }
+        // Connect two vertices
+        function connectVertices(i1, i2) {
+            const pair = [Math.min(i1, i2), Math.max(i1, i2)].join('-');
+            if (edges.has(pair)) {
+                feedback.textContent = 'Already connected! No duplicates in graphs.';
+                feedback.className = 'error';
+                playErrorSound();
+                selectedVertex = null;
+                return;
+            }
+            edges.add(pair);
+            drawEdges();
+            feedback.textContent = 'Great connection! Keep going.';
+            feedback.className = 'success';
+            playConnectSound();
+            selectedVertex = null;
+            const circles = graphSvg.querySelectorAll('.vertex');
+            circles.forEach(c => c.classList.remove('selected'));
+            checkCompletion();
+        }
+        // Draw edges
+        function drawEdges() {
+            // Remove existing edges
+            const existingEdges = graphSvg.querySelectorAll('.edge');
+            existingEdges.forEach(e => e.remove());
+            edges.forEach(pair => {
+                const [i1, i2] = pair.split('-').map(Number);
+                const v1 = vertices[i1];
+                const v2 = vertices[i2];
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', 'edge');
+                line.setAttribute('x1', v1.x);
+                line.setAttribute('y1', v1.y);
+                line.setAttribute('x2', v2.x);
+                line.setAttribute('y2', v2.y);
+                graphSvg.appendChild(line);
+            });
+        }
+        // Check if graph is complete
+        function checkCompletion() {
+            const requiredEdges = n * (n - 1) / 2;
+            if (edges.size === requiredEdges) {
+                isGameComplete = true;
+                feedback.innerHTML = `<span class="celebration">🎉 Awesome! You built K${n} with ${requiredEdges} edges!</span><br>Every vertex connects to all others.`;
+                feedback.className = 'success';
+                playSuccessSound();
+                nextBtn.disabled = false;
+                nextBtn.style.display = 'inline';
+                replayBtn.style.display = 'inline';
+                if (currentLevel === totalLevels) {
+                    replayGameBtn.style.display = 'inline';
+                    nextBtn.style.display = 'none';
+                    feedback.innerHTML += '<br><strong>Game Complete! You mastered complete graphs.</strong>';
+                }
+                updateProgress();
+                // Animate celebration: scale vertices
+                vertices.forEach((v, i) => {
+                    const circle = graphSvg.querySelectorAll('.vertex')[i];
+                    circle.style.animation = 'celebrate 1s ease-in-out infinite';
+                });
+            }
+        }
+        // Update level display
+        function updateLevel() {
+            currentLevelEl.textContent = currentLevel;
+            graphNEl.textContent = n;
+            const progress = (currentLevel / totalLevels) * 100;
+            progressBar.style.width = progress + '%';
+            document.getElementById('instruction').textContent = `Connect all pairs for K${n}! (${n * (n - 1) / 2} edges needed)`;
+        }
+        // Start level
+        function startLevel() {
+            n = currentLevel + 1;
+            generateVertices(n);
+            edges.clear();
+            isGameComplete = false;
+            selectedVertex = null;
+            drawVertices();
+            updateLevel();
+            feedback.textContent = `Level ${currentLevel}: Build K${n} by connecting all ${n} vertices.`;
+            feedback.className = 'info';
+            nextBtn.style.display = 'none';
+            replayBtn.style.display = 'none';
+            replayGameBtn.style.display = 'none';
+            nextBtn.disabled = true;
+            // Clear animations
+            document.querySelectorAll('.vertex').forEach(c => c.style.animation = '');
+        }
+        // Next level
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel > totalLevels) {
+                // Should not happen, but safety
+                restartGame();
+                return;
+            }
+            startLevel();
+        }
+        // Replay current level
+        function replayLevel() {
+            edges.clear();
+            isGameComplete = false;
+            selectedVertex = null;
+            drawVertices();
+            feedback.textContent = 'Replaying level. Connect all pairs!';
+            feedback.className = 'info';
+            nextBtn.disabled = true;
+            nextBtn.style.display = 'none';
+            replayBtn.style.display = 'none';
+            replayGameBtn.style.display = 'none';
+        }
+        // Restart entire game
+        function restartGame() {
+            currentLevel = 1;
+            startLevel();
+            gameScreen.style.display = 'block';
+            welcome.style.display = 'none';
+        }
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            gameScreen.style.display = 'block';
+            welcome.style.display = 'none';
+            startLevel();
+        });
+        nextBtn.addEventListener('click', nextLevel);
+        replayBtn.addEventListener('click', replayLevel);
+        replayGameBtn.addEventListener('click', restartGame);
+        // Touch support for mobile (simulate click)
+        graphSvg.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (elem && elem.classList.contains('vertex')) {
+                const index = Array.from(elem.parentNode.children).indexOf(elem);
+                selectVertex(index, e);
+            }
+        }, { passive: false });
+        // Keyboard navigation for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                selectedVertex = null;
+                document.querySelectorAll('.vertex').forEach(c => c.classList.remove('selected'));
+                feedback.textContent = 'Selection cleared.';
+            }
+        });
+        // Error handling: Resume audio if suspended
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+        // Initial focus for accessibility
+        startBtn.focus();
+    </script>
+</body>
+</html>

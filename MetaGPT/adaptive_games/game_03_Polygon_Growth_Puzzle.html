@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Growth Puzzle</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        /* Screen styles */
+        .screen {
+            display: none;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 400px;
+            position: relative;
+        }
+        .screen.active {
+            display: block;
+        }
+        h1 {
+            color: #4a90e2;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #7b68ee;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 150px;
+            touch-action: manipulation;
+        }
+        button:hover, button:focus {
+            background: #357abd;
+            transform: scale(1.05);
+            outline: 3px solid #4a90e2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* Progress bar */
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4a90e2;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        /* Game area */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sequence {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .polygon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .polygon-container:hover {
+            transform: scale(1.1);
+        }
+        .polygon-container.correct {
+            border: 3px solid #28a745;
+            background: rgba(40, 167, 74, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .polygon-container.wrong {
+            border: 3px solid #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .polygon-label {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1em;
+        }
+        svg {
+            width: 100px;
+            height: 100px;
+            transition: transform 0.3s ease;
+        }
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .option:hover, .option:focus {
+            border-color: #4a90e2;
+            transform: scale(1.05);
+            outline: none;
+        }
+        .option.selected {
+            border-color: #4a90e2;
+            background: rgba(74, 144, 226, 0.1);
+        }
+        .feedback {
+            font-size: 1.2em;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+        .success-celebration {
+            animation: celebrate 1s ease-in-out infinite;
+        }
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .sequence, .options {
+                flex-direction: column;
+                gap: 15px;
+            }
+            svg {
+                width: 80px;
+                height: 80px;
+            }
+            h1 { font-size: 2em; }
+            p { font-size: 1em; }
+            button { padding: 12px 20px; font-size: 1em; }
+        }
+        /* Accessibility high contrast mode support */
+        @media (prefers-contrast: high) {
+            body { background: #000; color: #fff; }
+            .container { background: #333; }
+            button { background: #0066cc; }
+        }
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        /* Hide offscreen for screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <!-- Welcome Screen -->
+        <div id="welcome" class="screen active" role="dialog" aria-labelledby="welcome-title">
+            <h1 id="welcome-title">Polygon Growth Puzzle</h1>
+            <p>This is Game 3 in our geometry adventure! You'll see sequences of regular polygons where the number of sides increases by a pattern. Your job is to pick the next polygon in the sequence.</p>
+            <p><strong>Learning Goal:</strong> Spot the rule, like "add 1 side each time" or "add 2 sides each time."</p>
+            <p>Click "Start Game" to begin! Use the buttons or tap on mobile.</p>
+            <button onclick="startGame()" aria-label="Start the Polygon Growth Puzzle game">Start Game</button>
+        </div>
+        <!-- Game Screen -->
+        <div id="game" class="screen">
+            <h2 id="level-title">Level 1: Find the Next Polygon</h2>
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <div class="game-area">
+                <div id="sequence" class="sequence" role="img" aria-label="Polygon sequence"></div>
+                <div id="options" class="options" role="radiogroup" aria-labelledby="level-title"></div>
+                <button id="next-btn" onclick="nextLevel()" disabled aria-label="Next level">Next Level</button>
+            </div>
+        </div>
+        <!-- Success Screen -->
+        <div id="success" class="screen">
+            <h1>Amazing Job!</h1>
+            <p id="success-message">You completed all levels and mastered polygon patterns!</p>
+            <p>Your score: <span id="final-score">100</span>%</p>
+            <div class="success-celebration">🎉</div>
+            <button onclick="replayGame()" aria-label="Play again">Play Again</button>
+            <button onclick="goHome()" aria-label="Return to welcome">Back to Start</button>
+        </div>
+    </div>
+    <script>
+        // Game state
+        let currentLevel = 0;
+        let score = 0;
+        let totalLevels = 5;
+        let levels = [
+            { // Level 1: +1
+                sequence: [3, 4, 5],
+                correct: 6,
+                rule: "Add 1 side each time",
+                options: [6, 7, 5],
+                label: "Triangle, Square, Pentagon"
+            },
+            { // Level 2: +1
+                sequence: [4, 5, 6],
+                correct: 7,
+                rule: "Add 1 side each time",
+                options: [7, 8, 6],
+                label: "Square, Pentagon, Hexagon"
+            },
+            { // Level 3: +2
+                sequence: [3, 5, 7],
+                correct: 9,
+                rule: "Add 2 sides each time",
+                options: [9, 8, 11],
+                label: "Triangle, Pentagon, Heptagon"
+            },
+            { // Level 4: +2
+                sequence: [5, 7, 9],
+                correct: 11,
+                rule: "Add 2 sides each time",
+                options: [11, 10, 12],
+                label: "Pentagon, Heptagon, Nonagon"
+            },
+            { // Level 5: +3
+                sequence: [3, 6, 9],
+                correct: 12,
+                rule: "Add 3 sides each time",
+                options: [12, 10, 15],
+                label: "Triangle, Hexagon, Nonagon"
+            }
+        ];
+        let selectedOption = null;
+        let audioContext = null;
+        // Initialize audio for feedback
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        function playSound(frequency, duration, type = 'sine') {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        function playCorrectSound() {
+            playSound(800, 0.2); // Ding
+        }
+        function playWrongSound() {
+            playSound(400, 0.2, 'square'); // Buzz
+        }
+        function playCelebrateSound() {
+            playSound(600, 0.1);
+            setTimeout(() => playSound(800, 0.1), 100);
+            setTimeout(() => playSound(1000, 0.3), 200);
+        }
+        // Draw regular polygon SVG
+        function drawPolygon(sides, size = 50, color = '#4a90e2') {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '-100 -100 200 200');
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-label', `${sides}-sided polygon`);
+            const points = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = (2 * Math.PI / sides) * i;
+                const x = size * Math.cos(angle);
+                const y = size * Math.sin(angle);
+                points.push(`${x},${y}`);
+            }
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            poly.setAttribute('points', points.join(' '));
+            poly.setAttribute('fill', color);
+            poly.setAttribute('stroke', '#333');
+            poly.setAttribute('stroke-width', '2');
+            svg.appendChild(poly);
+            return svg;
+        }
+        // Polygon names for labels
+        const polygonNames = {
+            3: 'Triangle', 4: 'Square', 5: 'Pentagon', 6: 'Hexagon',
+            7: 'Heptagon', 8: 'Octagon', 9: 'Nonagon', 10: 'Decagon',
+            11: 'Hendecagon', 12: 'Dodecagon', 15: 'Pentadecagon'
+        };
+        // Start game
+        function startGame() {
+            currentLevel = 0;
+            score = 0;
+            document.getElementById('welcome').classList.remove('active');
+            document.getElementById('game').classList.add('active');
+            loadLevel();
+        }
+        // Load current level
+        function loadLevel() {
+            if (currentLevel >= totalLevels) {
+                endGame();
+                return;
+            }
+            const level = levels[currentLevel];
+            document.getElementById('level-title').textContent = `Level ${currentLevel + 1}: Find the Next Polygon`;
+            document.getElementById('level-title').setAttribute('aria-label', level.label);
+            // Sequence
+            const sequenceDiv = document.getElementById('sequence');
+            sequenceDiv.innerHTML = '';
+            level.sequence.forEach((sides, index) => {
+                const container = document.createElement('div');
+                container.className = 'polygon-container';
+                container.appendChild(drawPolygon(sides));
+                const label = document.createElement('div');
+                label.className = 'polygon-label';
+                label.textContent = `${sides} sides`;
+                label.setAttribute('aria-label', `${polygonNames[sides] || sides + '-sided polygon'} (${sides} sides)`);
+                container.appendChild(label);
+                sequenceDiv.appendChild(container);
+            });
+            // Options
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            level.options.forEach(sides => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.setAttribute('role', 'radio');
+                option.setAttribute('tabindex', '0');
+                option.setAttribute('aria-checked', 'false');
+                option.appendChild(drawPolygon(sides, 40));
+                const label = document.createElement('div');
+                label.className = 'polygon-label';
+                label.textContent = `${sides} sides`;
+                label.setAttribute('aria-label', `${polygonNames[sides] || sides + '-sided polygon'} (${sides} sides)`);
+                option.appendChild(label);
+                option.addEventListener('click', () => selectOption(option, sides));
+                option.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectOption(option, sides);
+                    }
+                });
+                optionsDiv.appendChild(option);
+            });
+            // Reset
+            selectedOption = null;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-btn').disabled = true;
+            updateProgress();
+        }
+        // Select option
+        function selectOption(option, sides) {
+            // Deselect previous
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.setAttribute('aria-checked', 'false');
+            });
+            option.classList.add('selected');
+            option.setAttribute('aria-checked', 'true');
+            selectedOption = sides;
+            // Auto-check if correct
+            setTimeout(() => checkAnswer(), 300); // Slight delay for interaction feel
+        }
+        // Check answer
+        function checkAnswer() {
+            if (selectedOption === null) return;
+            const level = levels[currentLevel];
+            const feedback = document.getElementById('feedback');
+            const sequenceDiv = document.getElementById('sequence');
+            const optionsDiv = document.getElementById('options');
+            if (selectedOption === level.correct) {
+                score += 20; // 100% total
+                feedback.textContent = `Correct! The rule is: ${level.rule}. Great job!`;
+                feedback.style.color = '#28a745';
+                playCorrectSound();
+                // Animate sequence last polygon
+                const lastSeq = sequenceDiv.children[sequenceDiv.children.length - 1];
+                lastSeq.classList.add('correct');
+                // Animate correct option
+                const correctOpt = Array.from(optionsDiv.children).find(opt => {
+                    return parseInt(opt.querySelector('.polygon-label').textContent) === level.correct;
+                });
+                correctOpt.classList.add('correct');
+                document.getElementById('next-btn').disabled = false;
+            } else {
+                feedback.textContent = `Not quite! Try again. Hint: ${level.rule}`;
+                feedback.style.color = '#dc3545';
+                playWrongSound();
+                // Shake wrong option
+                const wrongOpt = Array.from(optionsDiv.children).find(opt => {
+                    return parseInt(opt.querySelector('.polygon-label').textContent) === selectedOption;
+                });
+                wrongOpt.classList.add('wrong');
+                setTimeout(() => wrongOpt.classList.remove('wrong'), 500);
+            }
+        }

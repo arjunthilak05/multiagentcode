@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazing Fractals!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        h1 {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        #instructions {
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            max-width: 95%;
+        }
+        canvas {
+            border: 3px solid #ff6b6b;
+            border-radius: 10px;
+            background: #fff;
+            margin-bottom: 15px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #45b7aa;
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #iteration-slider {
+            width: 200px;
+            margin: 0 10px;
+        }
+        #info {
+            text-align: center;
+            font-size: 1.2em;
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            canvas { width: 100%; height: auto; }
+            .controls { flex-direction: column; align-items: center; }
+            #iteration-slider { width: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Amazing Fractals!</h1>
+    <div id="instructions">
+        <h2>Welcome to Fractal Fun!</h2>
+        <p>Fractals are cool patterns that look the same no matter how much you zoom in! They're like never-ending shapes made by repeating simple rules.</p>
+        <p>In this game, we'll explore a <strong>Fractal Tree</strong>. Click "Grow Tree" to start, then use the slider to add more branches (iterations). Each level makes it more fractal-like!</p>
+        <p>Fun Fact: Fractals are everywhere – in nature, like trees and coastlines, and in math!</p>
+        <p>Try different levels and see how the tree gets bushier. Click on the tree to hear a fun sound!</p>
+    </div>
+    <div id="game-container">
+        <canvas id="fractalCanvas" width="600" height="500"></canvas>
+        <div class="controls">
+            <button onclick="drawFractalTree()">Grow Tree</button>
+            <label for="iteration-slider">Branches: <span id="iterValue">3</span></label>
+            <input type="range" id="iteration-slider" min="1" max="8" value="3" onchange="updateIter(this.value)">
+            <button onclick="clearCanvas()">New Tree</button>
+        </div>
+        <div id="info">Click "Grow Tree" to begin exploring fractals!</div>
+    </div>
+    <script>
+        const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let iteration = 3;
+
+        function playSound(frequency = 440, duration = 0.1) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('info').innerText = 'Click "Grow Tree" to begin exploring fractals!';
+        }
+
+        function updateIter(val) {
+            iteration = parseInt(val);
+            document.getElementById('iterValue').innerText = val;
+            drawFractalTree();
+        }
+
+        function drawLine(x1, y1, x2, y2, width = 2, color = '#8B4513') {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+        }
+
+        function drawFractalTree(x, y, length, angle, depth) {
+            if (depth === 0) return;
+
+            const x2 = x + length * Math.cos(angle);
+            const y2 = y + length * Math.sin(angle);
+            drawLine(x, y, x2, y2, 5 - depth, depth > 5 ? '#228B22' : '#8B4513');
+
+            const newLength = length * 0.7;
+            const branchAngle = angle + Math.PI / 6;
+            const branchAngle2 = angle - Math.PI / 6;
+
+            drawFractalTree(x2, y2, newLength, branchAngle, depth - 1);
+            drawFractalTree(x2, y2, newLength, branchAngle2, depth - 1);
+        }
+
+        function drawFractalTree() {
+            clearCanvas();
+            const startX = canvas.width / 2;
+            const startY = canvas.height - 50;
+            const initialLength = 100;
+            const initialAngle = -Math.PI / 2;
+            drawFractalTree(startX, startY, initialLength, initialAngle, iteration);
+            document.getElementById('info').innerText = `Wow! A fractal tree with ${iteration} levels of branches. Fractals repeat patterns at every scale!`;
+            playSound(523.25, 0.2); // C5 note
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            // Simple check if click is on canvas area
+            if (x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
+                playSound(659.25, 0.1); // E5 note
+                document.getElementById('info').innerText = 'You clicked the fractal! See how the branches repeat the same pattern? That\'s self-similarity!';
+            }
+        });
+
+        // Make canvas responsive
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const maxWidth = Math.min(600, window.innerWidth - 40);
+            canvas.width = maxWidth;
+            canvas.height = maxWidth * 500 / 600;
+            if (iteration > 0) drawFractalTree(); // Redraw if tree exists
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>

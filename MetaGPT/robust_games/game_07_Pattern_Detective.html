@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Detective!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        #gameContainer {
+            max-width: 600px;
+            width: 90%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+        #instructions {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        #gameArea {
+            display: none;
+        }
+        .pattern {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .pattern-item {
+            width: 60px;
+            height: 60px;
+            background: #74b9ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .pattern-item:hover {
+            transform: scale(1.1);
+        }
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .option {
+            width: 80px;
+            height: 80px;
+            background: #00b894;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover {
+            background: #00a085;
+            transform: scale(1.05);
+        }
+        .option.correct {
+            background: #00b894;
+            animation: pulse 0.5s;
+        }
+        .option.incorrect {
+            background: #e17055;
+            animation: shake 0.5s;
+        }
+        #submitBtn {
+            background: #fdcb6e;
+            color: #2d3436;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.2s;
+        }
+        #submitBtn:hover {
+            background: #e58e26;
+        }
+        #score {
+            font-size: 24px;
+            color: #00b894;
+            margin: 10px 0;
+        }
+        #feedback {
+            font-size: 20px;
+            margin: 10px 0;
+            min-height: 30px;
+        }
+        #startBtn {
+            background: #fd79a8;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        #startBtn:hover {
+            background: #e84393;
+        }
+        #endScreen {
+            display: none;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @media (max-width: 480px) {
+            .pattern-item, .option {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+            .option {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1>🕵️‍♂️ Pattern Detective!</h1>
+        <div id="startScreen">
+            <div id="instructions">
+                Welcome, young detective! Look at the pattern of numbers below. Figure out the rule and choose the next number from the options. There are 5 levels. Get as many correct as you can!<br><br>
+                Examples of rules: Add 2 each time, multiply by 2, etc.
+            </div>
+            <button id="startBtn">Start Adventure!</button>
+        </div>
+        <div id="gameArea">
+            <div id="score">Score: 0 / 0</div>
+            <div id="levelInfo">Level 1</div>
+            <div id="pattern" class="pattern"></div>
+            <div id="options" class="options"></div>
+            <button id="submitBtn" style="display:none;">Check Answer!</button>
+            <div id="feedback"></div>
+            <button id="nextBtn" style="display:none; background:#6c5ce7; color:white;">Next Level</button>
+        </div>
+        <div id="endScreen">
+            <h2>Great Job, Detective!</h2>
+            <div id="finalScore"></div>
+            <button id="restartBtn" style="background:#00b894; color:white;">Play Again!</button>
+        </div>
+    </div>
+    <script>
+        // Simple Web Audio for sounds
+        function playSound(frequency, duration) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCorrect() {
+            playSound(800, 0.2);
+        }
+
+        function playIncorrect() {
+            playSound(400, 0.2);
+        }
+
+        // Game data
+        const levels = [
+            { sequence: [2, 4, 6, 8], correct: 10, options: [9, 10, 12, 7], rule: "Add 2 each time" },
+            { sequence: [3, 6, 12, 24], correct: 48, options: [36, 48, 30, 72], rule: "Multiply by 2 each time" },
+            { sequence: [1, 3, 7, 15], correct: 31, options: [16, 31, 30, 17], rule: "Multiply by 2 and add 1" },
+            { sequence: [5, 10, 8, 16], correct: 14, options: [20, 14, 32, 12], rule: "Multiply by 2, then subtract 2, alternate" },
+            { sequence: [100, 90, 81, 73], correct: 66, options: [64, 66, 72, 55], rule: "Subtract increasing numbers: -10, -9, -8, etc." }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        const startScreen = document.getElementById('startScreen');
+        const gameArea = document.getElementById('gameArea');
+        const endScreen = document.getElementById('endScreen');
+        const patternDiv = document.getElementById('pattern');
+        const optionsDiv = document.getElementById('options');
+        const submitBtn = document.getElementById('submitBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const feedback = document.getElementById('feedback');
+        const scoreDiv = document.getElementById('score');
+        const levelInfo = document.getElementById('levelInfo');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const finalScore = document.getElementById('finalScore');
+
+        function init() {
+            currentLevel = 0;
+            score = 0;
+            startScreen.style.display = 'block';
+            gameArea.style.display = 'none';
+            endScreen.style.display = 'none';
+        }
+
+        function showLevel() {
+            const level = levels[currentLevel];
+            levelInfo.textContent = `Level ${currentLevel + 1}`;
+            scoreDiv.textContent = `Score: ${score} / ${currentLevel}`;
+
+            // Show pattern
+            patternDiv.innerHTML = '';
+            level.sequence.forEach(num => {
+                const item = document.createElement('div');
+                item.className = 'pattern-item';
+                item.textContent = num;
+                patternDiv.appendChild(item);
+            });
+
+            // Show options
+            optionsDiv.innerHTML = '';
+            level.options.forEach(opt => {
+                const option = document.createElement('button');
+                option.className = 'option';
+                option.textContent = opt;
+                option.onclick = () => selectOption(option, opt);
+                optionsDiv.appendChild(option);
+            });
+
+            selectedOption = null;
+            submitBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            feedback.textContent = '';
+            optionsDiv.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function selectOption(button, value) {
+            optionsDiv.querySelectorAll('.option').forEach(opt => opt.style.border = 'none');
+            button.style.border = '3px solid #fdcb6e';
+            selectedOption = value;
+            submitBtn.style.display = 'inline-block';
+        }
+
+        function checkAnswer() {
+            if (selectedOption === null) return;
+            const level = levels[currentLevel];
+            const options = optionsDiv.querySelectorAll('.option');
+            options.forEach(opt => {
+                const val = parseInt(opt.textContent);
+                if (val === level.correct) {
+                    opt.classList.add('correct');
+                } else if (val === selectedOption) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            if (selectedOption === level.correct) {
+                feedback.textContent = `Correct! Rule: ${level.rule}`;
+                feedback.style.color = 'green';
+                score++;
+                playCorrect();
+            } else {
+                feedback.textContent = `Oops! The next is ${level.correct}. Rule: ${level.rule}`;
+                feedback.style.color = 'red';
+                playIncorrect();
+            }
+            scoreDiv.textContent = `Score: ${score} / ${currentLevel + 1}`;
+            nextBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'none';
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel < levels.length) {
+                showLevel();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            gameArea.style.display = 'none';
+            endScreen.style.display = 'block';
+            finalScore.innerHTML = `<h3>Your Score: ${score} / ${levels.length}</h3><p>${score === levels.length ? 'Perfect Detective!' : score >= 3 ? 'Great Job!' : 'Keep Practicing!'}</p>`;
+        }
+
+        // Event listeners
+        startBtn.onclick = () => {
+            startScreen.style.display = 'none';
+            gameArea.style.display = 'block';
+            showLevel();
+        };
+
+        submitBtn.onclick = checkAnswer;
+        nextBtn.onclick = nextLevel;
+        restartBtn.onclick = init;
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Educational Games - Perfect Learning Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .game-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .game-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .game-number {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .game-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        .game-details {
+            margin: 15px 0;
+        }
+        .detail-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .detail-icon {
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .difficulty {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .difficulty.very-easy { background: #e8f5e8; color: #2e7d32; }
+        .difficulty.easy { background: #e3f2fd; color: #1565c0; }
+        .difficulty.medium { background: #fff3e0; color: #ef6c00; }
+        .difficulty.hard { background: #fce4ec; color: #c2185b; }
+        .difficulty.very-hard { background: #f3e5f5; color: #7b1fa2; }
+        .play-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        .play-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .analysis-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Adaptive Educational Games</h1>
+        <p>Perfectly designed learning experience based on content analysis</p>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Perfect Games</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">54</div>
+                <div class="stat-label">Minutes of Learning</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Concepts Covered</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="analysis-section">
+            <h2>🔍 Content Analysis Results</h2>
+            <p><strong>Reasoning:</strong> This content covers foundational geometry, five specific shape sequences, and general skills for recognition, extension, and rule description. With 2 simple concepts (1 game each), 3 medium (2 games each), and 2 complex (3 games each), the total aligns to 10 games for progressive mastery without gaps or overload, ensuring complete coverage through unique, building experiences.</p>
+            <p><strong>Complexity Breakdown:</strong></p>
+            <ul>
+                <li>Simple concepts: 2</li>
+                <li>Medium concepts: 3</li>
+                <li>Complex concepts: 2</li>
+            </ul>
+        </div>
+        
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">1</div>
+                    <div class="game-title">Shape Basics Explorer</div>
+                    <div class="difficulty very-easy">Very Easy</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Introduction to patterns in shapes and geometry</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Identify basic shapes in 1D, 2D, 3D and recognize geometry as the study of shape patterns</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 5 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_01_Shape_Basics_Explorer.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">2</div>
+                    <div class="game-title">Polygon Pattern Spotter</div>
+                    <div class="difficulty easy">Easy</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Regular polygon sequences</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Recognize and identify polygons by increasing sides (triangle to decagon)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 6 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_02_Polygon_Pattern_Spotter.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">3</div>
+                    <div class="game-title">Next Polygon Builder</div>
+                    <div class="difficulty medium">Medium</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Regular polygon sequences</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Draw and extend the next polygon in the sequence, understanding the rule of adding sides</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 6 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_03_Next_Polygon_Builder.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">4</div>
+                    <div class="game-title">Graph Connection Challenge</div>
+                    <div class="difficulty easy">Easy</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Complete graph sequences (Kn)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Identify complete graphs K2 to K6 and their vertex connections</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 6 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_04_Graph_Connection_Challenge.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">5</div>
+                    <div class="game-title">Connect the Dots Graph</div>
+                    <div class="difficulty medium">Medium</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Complete graph sequences (Kn)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Create complete graphs by connecting all vertices and describe the pattern of edges</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 7 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_05_Connect_the_Dots_Graph.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">6</div>
+                    <div class="game-title">Square Stack Puzzle</div>
+                    <div class="difficulty easy">Easy</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Stacked squares sequences</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Recognize growing square grids (1x1 to 5x5) as a pattern</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 5 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_06_Square_Stack_Puzzle.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">7</div>
+                    <div class="game-title">Build Bigger Squares</div>
+                    <div class="difficulty medium">Medium</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Stacked squares sequences</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Extend stacked squares by adding layers and explain the growth rule</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 6 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_07_Build_Bigger_Squares.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">8</div>
+                    <div class="game-title">Triangle Stack Adventure</div>
+                    <div class="difficulty medium">Medium</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Stacked triangles sequences</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Identify and extend triangular arrangements, understanding row-based growth</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 6 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_08_Triangle_Stack_Adventure.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+            <div class="game-card">
+                <div class="game-header">
+                    <div class="game-number">9</div>
+                    <div class="game-title">Snowflake Fractal Journey</div>
+                    <div class="difficulty hard">Hard</div>
+                </div>
+                
+                <div class="game-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">🎯</span>
+                        <span><strong>Concept:</strong> Koch snowflake sequence</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📚</span>
+                        <span><strong>Objective:</strong> Recognize iterative stages of the Koch snowflake and apply fractal rules</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">⏱️</span>
+                        <span><strong>Time:</strong> 7 minutes</span>
+                    </div>
+                </div>
+                
+                <button class="play-btn" onclick="window.open('game_09_Snowflake_Fractal_Journey.html', '_blank')">
+                    🚀 Start Learning
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

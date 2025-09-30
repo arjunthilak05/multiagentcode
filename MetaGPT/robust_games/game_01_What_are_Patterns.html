@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What are Patterns?</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #ffeb3b, #4caf50);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        #container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e91e63;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        #instructions {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        #gameArea {
+            margin: 20px 0;
+        }
+        .pattern-item {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .pattern-item:hover {
+            transform: scale(1.1);
+        }
+        .pattern-item.correct {
+            border-color: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+        .pattern-item.incorrect {
+            border-color: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+        #options {
+            margin: 20px 0;
+        }
+        .option {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 4px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .option:hover {
+            transform: scale(1.1);
+        }
+        #feedback {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+        #nextBtn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            display: none;
+        }
+        #nextBtn:hover {
+            background: #45a049;
+        }
+        #startBtn {
+            background: #e91e63;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        #startBtn:hover {
+            background: #c2185b;
+        }
+        @media (max-width: 480px) {
+            .pattern-item, .option {
+                width: 50px;
+                height: 50px;
+                margin: 5px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            #instructions {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>What are Patterns?</h1>
+        <div id="instructions">
+            Patterns are repeating sequences! Look at the colors below and click the one that comes next to complete the pattern.
+        </div>
+        <button id="startBtn" onclick="startGame()">Start Game</button>
+        <div id="gameArea" style="display: none;">
+            <div id="pattern"></div>
+            <div id="options"></div>
+            <div id="feedback"></div>
+            <button id="nextBtn" onclick="nextPattern()">Next Pattern</button>
+        </div>
+    </div>
+    <script>
+        const patterns = [
+            { seq: ['red', 'blue', 'red', 'blue'], next: 'red', colors: {red: '#f44336', blue: '#2196f3'} },
+            { seq: ['green', 'yellow', 'green', 'yellow'], next: 'green', colors: {green: '#4caf50', yellow: '#ffeb3b'} },
+            { seq: ['purple', 'orange', 'purple', 'orange'], next: 'purple', colors: {purple: '#9c27b0', orange: '#ff9800'} },
+            { seq: ['pink', 'cyan', 'pink', 'cyan'], next: 'pink', colors: {pink: '#e91e63', cyan: '#00bcd4'} },
+            { seq: ['red', 'green', 'blue', 'red', 'green'], next: 'blue', colors: {red: '#f44336', green: '#4caf50', blue: '#2196f3'} }
+        ];
+        let currentPattern = 0;
+        let audioContext;
+
+        function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(frequency, duration) {
+            if (!audioContext) initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            oscillator.start();
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function startGame() {
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            showPattern();
+        }
+
+        function showPattern() {
+            const pat = patterns[currentPattern];
+            const patternDiv = document.getElementById('pattern');
+            patternDiv.innerHTML = '';
+            pat.seq.forEach(colorName => {
+                const item = document.createElement('div');
+                item.className = 'pattern-item';
+                item.style.backgroundColor = pat.colors[colorName];
+                item.dataset.color = colorName;
+                patternDiv.appendChild(item);
+            });
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            // Show two options: correct and one wrong
+            const wrong = pat.seq[pat.seq.length - 2] || Object.keys(pat.colors)[0];
+            const options = [pat.next, wrong];
+            options.forEach(opt => {
+                const optBtn = document.createElement('div');
+                optBtn.className = 'option';
+                optBtn.style.backgroundColor = pat.colors[opt];
+                optBtn.dataset.color = opt;
+                optBtn.onclick = () => checkAnswer(opt);
+                optionsDiv.appendChild(optBtn);
+            });
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function checkAnswer(selected) {
+            const pat = patterns[currentPattern];
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                if (opt.dataset.color === selected) {
+                    if (selected === pat.next) {
+                        opt.classList.add('correct');
+                        document.getElementById('feedback').innerHTML = 'Correct! Great job!';
+                        document.getElementById('feedback').style.color = '#4caf50';
+                        playSound(800, 0.2);
+                        if (currentPattern < patterns.length - 1) {
+                            document.getElementById('nextBtn').style.display = 'inline-block';
+                        } else {
+                            setTimeout(() => {
+                                document.getElementById('feedback').innerHTML = 'You completed all patterns! You\'re a pattern pro!';
+                            }, 500);
+                        }
+                    } else {
+                        opt.classList.add('incorrect');
+                        document.getElementById('feedback').innerHTML = 'Try again! The next is ' + pat.next + '.';
+                        document.getElementById('feedback').style.color = '#f44336';
+                        playSound(400, 0.3);
+                    }
+                }
+            });
+        }
+
+        function nextPattern() {
+            currentPattern++;
+            showPattern();
+        }
+
+        // Initialize audio on first interaction
+        document.addEventListener('click', initAudio, { once: true });
+    </script>
+</body>
+</html>

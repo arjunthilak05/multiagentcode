@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Square Stack Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Comic Sans MS', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            padding: 10px;
+        }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .objective {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        .game-area {
+            background: #fafafa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .progress {
+            background: #e3f2fd;
+            height: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .game-container {
+                margin: 10px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Square Stack Builder</h1>
+        
+        <div class="objective">
+            <h3>🎯 Learning Goal</h3>
+            <p>Recognize and build growing square grids from 1x1 to larger</p>
+            <p><strong>Concept:</strong> Pattern in stacked squares</p>
+        </div>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <h2>Ready to Learn?</h2>
+            <p>This interactive game will help you master <strong>Pattern in stacked squares</strong>!</p>
+            <button onclick="startLearning()" id="startBtn">🚀 Start Learning</button>
+        </div>
+        
+        <div id="feedback" class="feedback">
+            <h3>🎉 Excellent Work!</h3>
+            <p>You're making great progress learning about Pattern in stacked squares!</p>
+        </div>
+    </div>
+
+    <script>
+        let progress = 0;
+        let audioContext;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        
+        function playSound(frequency, duration, type = 'sine') {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        function updateProgress(newProgress) {
+            progress = Math.min(newProgress, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function showFeedback() {
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'feedback success';
+            playSound(523.25, 0.5); // C note
+        }
+        
+        function startLearning() {
+            initAudio();
+            updateProgress(25);
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <h2>🎓 Learning in Progress...</h2>
+                <p>Exploring the concept of <strong>Pattern in stacked squares</strong></p>
+                <button onclick="continueActivity()">Continue Learning</button>
+            `;
+            
+            playSound(440, 0.3); // A note
+        }
+        
+        function continueActivity() {
+            updateProgress(50);
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <h2>💡 Understanding Pattern in stacked squares</h2>
+                <p>You're developing a deeper understanding!</p>
+                <button onclick="practiceSkill()">Practice Skills</button>
+            `;
+            
+            playSound(493.88, 0.3); // B note
+        }
+        
+        function practiceSkill() {
+            updateProgress(75);
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <h2>🔍 Applying Knowledge</h2>
+                <p>Now let's apply what you've learned about Pattern in stacked squares!</p>
+                <button onclick="completeActivity()">Complete Activity</button>
+            `;
+            
+            playSound(523.25, 0.3); // C note
+        }
+        
+        function completeActivity() {
+            updateProgress(100);
+            showFeedback();
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <h2>🌟 Mastery Achieved!</h2>
+                <p>Congratulations! You've successfully learned about Pattern in stacked squares!</p>
+                <button onclick="restartActivity()">🔄 Learn Again</button>
+            `;
+            
+            // Play success melody
+            setTimeout(() => playSound(523.25, 0.2), 0);
+            setTimeout(() => playSound(587.33, 0.2), 200);
+            setTimeout(() => playSound(659.25, 0.4), 400);
+        }
+        
+        function restartActivity() {
+            progress = 0;
+            updateProgress(0);
+            document.getElementById('feedback').style.display = 'none';
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <h2>Ready to Learn?</h2>
+                <p>This interactive game will help you master <strong>Pattern in stacked squares</strong>!</p>
+                <button onclick="startLearning()">🚀 Start Learning</button>
+            `;
+        }
+        
+        // Add interactive click effects
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') {
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.target.style.transform = '';
+                }, 150);
+            }
+        });
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateProgress(0);
+        });
+    </script>
+</body>
+</html>

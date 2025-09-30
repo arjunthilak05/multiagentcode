@@ -1,0 +1,67 @@
+Extracted Text :
+
+1.5 Patterns in Shapes
+Other important and basic patterns that occur in Mathematics
+are patterns of shapes. These shapes may be in one, two, or three
+dimensions (1D, 2D, or 3D)
+—
+or in even more dimensions. The
+branch of Mathematics that studies patterns in shapes is called
+geometry.
+Shape sequences are one important type of shape pattern that
+mathematicians study. Table 3 shows a few key shape sequences
+that are studied in Mathematics.
+Reprint 2025-26
+9
+Ganita Prakash | Grade 6
+Table 3: Examples of shape sequences
+Triangle
+Quadrilateral Regular
+Pentagon
+Hexagon
+Polygons
+Heptagon
+Octagon
+Nonagon
+Decagon
+Complete
+Graphs
+K2 K3 K4 K6
+K5
+Stacked
+Squares
+Stacked
+Triangles
+Koch
+Snowflake
+10
+Reprint 2025-26
+Patterns in Mathematics
+Figure it Out 
+1. Can you recognise the pattern in each of the sequences in
+Table 3?
+2. Try and redraw each sequence in Table 3 in your notebook.
+Can you draw the next shape in each sequence? Why or why
+not? After each sequence, describe in your own words what
+is the rule or pattern for forming the shapes in the sequence
+
+Figure Description : 
+
+This page shows **Table 3: Examples of shape sequences** from a 6th grade mathematics textbook. The table displays five different types of mathematical patterns organized in rows:
+
+**Regular Polygons (Top row):**
+Shows polygons with increasing numbers of sides - Triangle (3 sides), Quadrilateral (4 sides), Pentagon (5 sides), Hexagon (6 sides), Heptagon (7 sides), Octagon (8 sides), Nonagon (9 sides), and Decagon (10 sides). Each shape is filled with different colors.
+
+**Complete Graphs (Second row):**
+Displays mathematical graphs labeled K2 through K6, where each graph shows all possible connections between vertices. K2 has 2 points connected by a line, K3 shows a triangle, K4 shows a square with diagonals, K5 shows a pentagon with all internal connections, and K6 shows a hexagon with all possible internal connections.
+
+**Stacked Squares (Third row):**
+Shows a sequence of square grids growing in size - starting with a single 1×1 square, then 2×2, 3×3, 4×4, and 5×5 grids of squares.
+
+**Stacked Triangles (Fourth row):**
+Presents triangular arrangements made of smaller triangles, growing from 1 triangle to increasingly larger triangular patterns with multiple rows.
+
+**Koch Snowflake (Bottom row):**
+Illustrates the famous fractal pattern starting with a simple triangle, then showing how it develops into a six-pointed star shape, and finally into increasingly complex snowflake-like patterns with jagged edges.
+
+This table helps students understand how mathematical shapes and patterns can form sequences that grow according to specific rules.

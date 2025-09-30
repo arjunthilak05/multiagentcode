@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet the Shapes!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        #gameContainer {
+            text-align: center;
+            max-width: 90%;
+            width: 600px;
+        }
+        h1 {
+            color: #ff6b6b;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+        button {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+        button:hover {
+            background: #45b7aa;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #shapeCanvas {
+            border: 3px solid #ff6b6b;
+            border-radius: 20px;
+            background: white;
+            margin: 20px auto;
+            display: block;
+            max-width: 100%;
+            height: 300px;
+        }
+        #options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        #questionText {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #ff6b6b;
+        }
+        #feedback {
+            font-size: 1.5em;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+        .correct {
+            color: green;
+            animation: pulse 0.5s;
+        }
+        .incorrect {
+            color: red;
+            animation: shake 0.5s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            button { font-size: 1em; padding: 12px 20px; min-width: 120px; }
+            #shapeCanvas { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="startScreen" class="screen active">
+            <h1>Meet the Shapes!</h1>
+            <p>Welcome to a fun game about basic geometric shapes! Click on the correct name for the shape shown. There are 10 questions. Let's learn together!</p>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="questionScreen" class="screen">
+            <h2 id="questionText">What shape is this?</h2>
+            <canvas id="shapeCanvas" width="400" height="300"></canvas>
+            <div id="feedback"></div>
+            <div id="options"></div>
+            <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Next</button>
+        </div>
+
+        <div id="endScreen" class="screen">
+            <h2 id="finalScore"></h2>
+            <p>Great job! You learned about shapes.</p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const shapes = [
+            { name: 'Circle', draw: function(ctx, x, y, size, color) {
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }},
+            { name: 'Square', draw: function(ctx, x, y, size, color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x - size/2, y - size/2, size, size);
+            }},
+            { name: 'Triangle', draw: function(ctx, x, y, size, color) {
+                ctx.beginPath();
+                ctx.moveTo(x, y - size/2);
+                ctx.lineTo(x - size/2, y + size/2);
+                ctx.lineTo(x + size/2, y + size/2);
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+            }},
+            { name: 'Rectangle', draw: function(ctx, x, y, w, h, color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x - w/2, y - h/2, w, h);
+            }},
+            { name: 'Pentagon', draw: function(ctx, x, y, size, color) {
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+            }},
+            { name: 'Hexagon', draw: function(ctx, x, y, size, color) {
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI * 2 / 6) * i - Math.PI / 2;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+            }}
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswer = '';
+        let questions = [];
+        let audioContext;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine') {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function startGame() {
+            initAudio();
+            currentQuestion = 0;
+            score = 0;
+            questions = [...shapes].sort(() => Math.random() - 0.5);
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('questionScreen').classList.add('active');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion >= 10) {
+                endGame();
+                return;
+            }
+            const shape = questions[currentQuestion % shapes.length];
+            correctAnswer = shape.name;
+            const canvas = document.getElementById('shapeCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7aa', '#f9ca24', '#f0932b', '#eb4d4b'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+            const size = Math.min(canvas.width, canvas.height) * 0.3;
+
+            if (shape.name === 'Rectangle') {
+                shape.draw(ctx, x, y, size * 1.5, size * 0.8, color);
+            } else if (shape.name === 'Pentagon' || shape.name === 'Hexagon') {
+                shape.draw(ctx, x, y, size, color);
+            } else {
+                shape.draw(ctx, x, y, size, color);
+            }
+
+            document.getElementById('questionText').textContent = 'What shape is this?';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = '';
+            document.getElementById('nextBtn').style.display = 'none';
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            const allNames = [...shapes.map(s => s.name)].sort(() => Math.random() - 0.5);
+            const selectedOptions = [correctAnswer];
+            while (selectedOptions.length < 4) {
+                const randName = allNames[Math.floor(Math.random() * allNames.length)];
+                if (!selectedOptions.includes(randName)) {
+                    selectedOptions.push(randName);
+                }
+            }
+            selectedOptions.sort(() => Math.random() - 0.5);
+
+            selectedOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(option);
+                optionsDiv.appendChild(btn);
+            });
+
+            currentQuestion++;
+        }
+
+        function selectAnswer(selected) {
+            const feedback = document.getElementById('feedback');
+            const buttons = document.querySelectorAll('#options button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selected === correctAnswer) {
+                score++;
+                feedback.textContent = 'Correct! Great job!';
+                feedback.className = 'correct';
+                playSound(800, 0.2);
+            } else {
+                feedback.textContent = 'Oops! Try again. It\'s a ' + correctAnswer;
+                feedback.className = 'incorrect';
+                playSound(400, 0.3, 'square');
+            }
+
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function endGame() {
+            document.getElementById('questionScreen').classList.remove('active');
+            document.getElementById('endScreen').classList.add('active');
+            document.getElementById('finalScore').textContent = `Your Score: ${score}/10`;
+        }
+
+        function restartGame() {
+            document.getElementById('endScreen').classList.remove('active');
+            document.getElementById('startScreen').classList.add('active');
+        }
+
+        window.onload = initAudio;
+    </script>
+</body>
+</html>

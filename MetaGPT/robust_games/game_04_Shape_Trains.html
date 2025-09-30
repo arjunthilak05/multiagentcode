@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Trains!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        h1 {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        #instructions {
+            background: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #game {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .shape {
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .shape:hover {
+            transform: scale(1.1);
+        }
+        .circle { width: 60px; height: 60px; background: #ff6b6b; border-radius: 50%; }
+        .square { width: 60px; height: 60px; background: #4ecdc4; }
+        .triangle { width: 0; height: 0; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 60px solid #45b7d1; background: transparent; }
+        .rectangle { width: 80px; height: 40px; background: #96ceb4; }
+        .pentagon { width: 60px; height: 60px; position: relative; background: #feca57; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+        #sequence {
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+        #options {
+            margin: 20px 0;
+        }
+        #options .shape {
+            margin: 15px;
+            font-size: 1.2em;
+        }
+        #feedback {
+            font-size: 1.5em;
+            margin: 10px 0;
+            min-height: 30px;
+        }
+        #score {
+            font-size: 1.2em;
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #ff5252;
+        }
+        @media (max-width: 600px) {
+            .shape { width: 50px; height: 50px; }
+            .triangle { border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 50px solid #45b7d1; }
+            .rectangle { width: 70px; height: 35px; }
+            .pentagon { width: 50px; height: 50px; }
+            h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Shape Trains!</h1>
+    <div id="instructions">
+        <p>Welcome to Shape Trains! Help build the train by choosing the next shape that fits the pattern.</p>
+        <p>Click on the correct shape from the options below the sequence. Get it right to hear a fun sound and score points!</p>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    <div id="game" style="display: none;">
+        <div id="sequence"></div>
+        <div id="options"></div>
+        <div id="feedback"></div>
+        <div id="score">Score: 0</div>
+        <button onclick="nextQuestion()">Next Question</button>
+    </div>
+    <script>
+        const shapes = ['circle', 'square', 'triangle', 'rectangle', 'pentagon'];
+        const shapeColors = {
+            circle: '#ff6b6b',
+            square: '#4ecdc4',
+            triangle: '#45b7d1',
+            rectangle: '#96ceb4',
+            pentagon: '#feca57'
+        };
+        let score = 0;
+        let currentSequence = [];
+        let correctNext = '';
+        let gameStarted = false;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            oscillator.start();
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function generateSequence() {
+            const patterns = [
+                { type: 'ABAB', length: 4 },
+                { type: 'ABCABC', length: 6 },
+                { type: 'AABB', length: 4 },
+                { type: 'ABBA', length: 4 },
+                { type: 'ABC', length: 3 }
+            ];
+            const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+            const seq = [];
+            let a = shapes[Math.floor(Math.random() * shapes.length)];
+            let b = shapes[Math.floor(Math.random() * shapes.length)];
+            let c = shapes[Math.floor(Math.random() * shapes.length)];
+            if (pattern.type === 'ABAB') {
+                seq.push(a, b, a, b);
+                correctNext = a;
+            } else if (pattern.type === 'ABCABC') {
+                seq.push(a, b, c, a, b, c);
+                correctNext = a;
+            } else if (pattern.type === 'AABB') {
+                seq.push(a, a, b, b);
+                correctNext = a;
+            } else if (pattern.type === 'ABBA') {
+                seq.push(a, b, b, a);
+                correctNext = b;
+            } else if (pattern.type === 'ABC') {
+                seq.push(a, b, c);
+                correctNext = a; // Simple repeat
+            }
+            currentSequence = seq.slice(0, Math.min(seq.length, 5)); // Show up to 5
+            return seq[seq.length - 1] === correctNext ? correctNext : shapes[Math.floor(Math.random() * shapes.length)]; // Ensure logic
+        }
+
+        function createShapeElement(shapeType, clickable = true) {
+            const el = document.createElement('div');
+            el.className = `shape ${shapeType}`;
+            if (shapeType === 'triangle') {
+                el.innerHTML = ''; // Triangle is border-based
+            } else if (shapeType === 'pentagon') {
+                el.style.clipPath = 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)';
+            }
+            el.style.background = shapeColors[shapeType];
+            if (clickable) {
+                el.onclick = () => selectShape(shapeType);
+            }
+            return el;
+        }
+
+        function displaySequence() {
+            const seqDiv = document.getElementById('sequence');
+            seqDiv.innerHTML = '';
+            currentSequence.forEach(shape => {
+                const el = createShapeElement(shape, false);
+                seqDiv.appendChild(el);
+            });
+        }
+
+        function displayOptions() {
+            const optsDiv = document.getElementById('options');
+            optsDiv.innerHTML = '';
+            const options = [correctNext];
+            while (options.length < 3) {
+                const wrong = shapes[Math.floor(Math.random() * shapes.length)];
+                if (wrong !== correctNext && !options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+            options.sort(() => Math.random() - 0.5); // Shuffle
+            options.forEach(shape => {
+                optsDiv.appendChild(createShapeElement(shape));
+            });
+        }
+
+        function selectShape(selected) {
+            const feedback = document.getElementById('feedback');
+            if (selected === correctNext) {
+                feedback.textContent = 'Correct! Great job!';
+                feedback.style.color = 'green';
+                score++;
+                playSound(800, 0.3); // High tone
+            } else {
+                feedback.textContent = `Oops! The correct shape was ${correctNext}.`;
+                feedback.style.color = 'red';
+                playSound(400, 0.3); // Low tone
+            }
+            document.getElementById('score').textContent = `Score: ${score}`;
+            // Disable further clicks
+            document.querySelectorAll('#options .shape').forEach(el => el.onclick = null);
+        }
+
+        function nextQuestion() {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = '';
+            correctNext = generateSequence();
+            displaySequence();
+            displayOptions();
+        }
+
+        function startGame() {
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            gameStarted = true;
+            score = 0;
+            nextQuestion();
+        }
+    </script>
+</body>
+</html>

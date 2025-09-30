@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Polygon Family</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF4500;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #4B0082;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+        button {
+            background: #FFD700;
+            border: none;
+            padding: 15px 25px;
+            margin: 10px;
+            border-radius: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            touch-action: manipulation;
+        }
+        button:hover {
+            background: #FFA500;
+        }
+        .option {
+            background: #FF69B4;
+            color: white;
+            font-size: 16px;
+            padding: 12px 20px;
+            margin: 8px;
+            min-width: 120px;
+        }
+        .option:hover {
+            background: #FF1493;
+        }
+        canvas {
+            border: 3px solid #000;
+            border-radius: 15px;
+            background: white;
+            max-width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            display: block;
+        }
+        #instructions, #game, #end {
+            margin: 20px 0;
+        }
+        #score {
+            font-size: 24px;
+            color: #4B0082;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #container {
+                padding: 15px;
+            }
+            button, .option {
+                padding: 12px 20px;
+                font-size: 16px;
+                margin: 5px;
+            }
+            canvas {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>The Polygon Family</h1>
+        <div id="instructions">
+            <h2>Welcome!</h2>
+            <p>Regular polygons are shapes with all sides equal and all angles equal. They belong to different "families" based on the number of sides.</p>
+            <p><strong>Triangle:</strong> 3 sides</p>
+            <p><strong>Square:</strong> 4 sides</p>
+            <p><strong>Pentagon:</strong> 5 sides</p>
+            <p><strong>Hexagon:</strong> 6 sides</p>
+            <p><strong>Heptagon:</strong> 7 sides</p>
+            <p><strong>Octagon:</strong> 8 sides</p>
+            <p>In this game, a regular polygon will appear. Click the button with its correct name to classify it! Get all 8 right to win.</p>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+        <div id="game" style="display:none;">
+            <canvas id="canvas"></canvas>
+            <div id="question">What is this polygon called?</div>
+            <div id="options"></div>
+            <div id="score">Score: 0</div>
+        </div>
+        <div id="end" style="display:none;">
+            <h2>Game Over!</h2>
+            <p>Your score: <span id="finalscore"></span>/8</p>
+            <p>Great job learning about the Polygon Family!</p>
+            <button onclick="restart()">Play Again</button>
+        </div>
+    </div>
+    <script>
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        var w, h;
+        var score = 0;
+        var questionCount = 0;
+        var maxQuestions = 8;
+        var currentSides;
+        var gameActive = false;
+        var audioCtx;
+        var questions = [3,4,5,6,7,8];
+        var names = {3:'Triangle', 4:'Square', 5:'Pentagon', 6:'Hexagon', 7:'Heptagon', 8:'Octagon'};
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(frequency, duration) {
+            initAudio();
+            var oscillator = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration / 1000);
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth * 2;
+            canvas.height = canvas.clientHeight * 2;
+            w = canvas.width;
+            h = canvas.height;
+            ctx.scale(2, 2);
+            if (gameActive) {
+                drawPolygon(currentSides);
+            }
+        }
+
+        function drawPolygon(sides, color = '#0000FF') {
+            ctx.clearRect(0, 0, w/2, h/2);
+            var centerX = (w/2) / 2;
+            var centerY = (h/2) / 2;
+            var radius = Math.min(centerX, centerY) * 0.8;
+            ctx.beginPath();
+            var angle = 0;
+            ctx.moveTo(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle));
+            for (var i = 1; i <= sides; i++) {
+                angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
+                ctx.lineTo(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle));
+            }
+            ctx.closePath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFE0';
+            ctx.fill();
+        }
+
+        function flashColor(correct) {
+            var color = correct ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)';
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, w/2, h/2);
+            setTimeout(() => {
+                drawPolygon(currentSides);
+            }, 500);
+        }
+
+        function nextQuestion() {
+            if (questionCount >= maxQuestions) {
+                endGame();
+                return;
+            }
+            currentSides = questions[Math.floor(Math.random() * questions.length)];
+            drawPolygon(currentSides);
+            var options = [currentSides];
+            while (options.length < 4) {
+                var opt = questions[Math.floor(Math.random() * questions.length)];
+                if (options.indexOf(opt) === -1) {
+                    options.push(opt);
+                }
+            }
+            options.sort(() => Math.random() - 0.5);
+            var optDiv = document.getElementById('options');
+            optDiv.innerHTML = '';
+            options.forEach(s => {
+                var btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = names[s];
+                btn.onclick = () => checkAnswer(s);
+                optDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (selected === currentSides) {
+                score++;
+                playTone(800, 200);
+                flashColor(true);
+                document.getElementById('score').textContent = 'Score: ' + score;
+                questionCount++;
+                if (questionCount >= maxQuestions) {
+                    setTimeout(endGame, 1000);
+                } else {
+                    setTimeout(nextQuestion, 1000);
+                }
+            } else {
+                playTone(400, 200);
+                flashColor(false);
+            }
+        }
+
+        function startGame() {
+            initAudio();
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            score = 0;
+            questionCount = 0;
+            gameActive = true;
+            document.getElementById('score').textContent = 'Score: 0';
+            resizeCanvas();
+            nextQuestion();
+        }
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('end').style.display = 'block';
+            document.getElementById('finalscore').textContent = score;
+        }
+
+        function restart() {
+            document.getElementById('end').style.display = 'none';
+            document.getElementById('instructions').style.display = 'block';
+            gameActive = false;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>

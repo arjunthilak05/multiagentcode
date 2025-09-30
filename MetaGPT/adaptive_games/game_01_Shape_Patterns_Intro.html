@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Patterns Intro</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            color: #333;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameContainer {
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Screen styles */
+        .screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        .screen.active {
+            display: flex;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            font-size: 1.8em;
+            color: #6b6b6b;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            max-width: 600px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* Level styles */
+        #gameScreen {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .pattern-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .shape {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+            animation: bounceIn 0.5s ease-out;
+        }
+        .shape:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .shape.correct {
+            background: #4CAF50;
+            color: white;
+            animation: celebrate 0.6s ease-in-out infinite;
+        }
+        .shape.incorrect {
+            background: #f44336;
+            color: white;
+            animation: shake 0.5s ease-in-out;
+        }
+        .shape-placeholder {
+            width: 80px;
+            height: 80px;
+            border: 3px dashed #999;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: #999;
+        }
+        .options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .option-shape {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .option-shape:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .option-shape.selected {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+        /* Progress indicator */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        /* Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .screen {
+            animation: fadeIn 0.5s ease-out;
+        }
+        /* Success screen */
+        .celebration {
+            font-size: 3em;
+            color: #4CAF50;
+            animation: celebrate 1s ease-in-out infinite;
+            margin: 20px 0;
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .shape, .option-shape {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+            h1 { font-size: 2em; }
+            p { font-size: 1em; }
+            button { padding: 12px 24px; font-size: 1em; }
+        }
+        /* Accessibility */
+        button:focus, .shape:focus, .option-shape:focus {
+            outline: 3px solid #4CAF50;
+            outline-offset: 2px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer" role="main">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active" role="dialog" aria-labelledby="welcomeTitle">
+            <h1 id="welcomeTitle">Shape Patterns Intro</h1>
+            <p>Welcome to the first game in our geometry adventure! Today, we'll learn that geometry is all about studying patterns in shapes. We'll explore patterns in 1D (like lines), 2D (flat shapes), and even touch on 3D (3D objects).</p>
+            <p>Your goal: Spot the pattern and choose the next shape to complete it!</p>
+            <button onclick="startGame()" aria-label="Start the game">Let's Begin!</button>
+        </div>
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen" role="game" aria-live="polite">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <h2 id="levelTitle"></h2>
+            <p id="levelInstructions"></p>
+            <div id="patternContainer" class="pattern-container"></div>
+            <div id="optionsContainer" class="options"></div>
+            <button id="submitBtn" onclick="submitAnswer()" disabled>Check Answer</button>
+            <button id="nextBtn" onclick="nextLevel()" style="display: none;">Next Level</button>
+            <div id="feedback" aria-live="assertive"></div>
+        </div>
+        <!-- Success Screen -->
+        <div id="successScreen" class="screen" role="dialog" aria-labelledby="successTitle">
+            <div class="celebration">🎉 Great Job! 🎉</div>
+            <h1 id="successTitle">You Mastered Shape Patterns Intro!</h1>
+            <p>You now understand how geometry studies patterns in 1D, 2D, and 3D shapes. You're ready for more!</p>
+            <button onclick="replayGame()">Play Again</button>
+            <button onclick="exitGame()">Exit</button>
+        </div>
+    </div>
+    <script>
+        // Game state
+        let currentLevel = 0;
+        let score = 0;
+        let totalLevels = 3;
+        let selectedOption = null;
+        let audioContext = null;
+        // Levels data
+        const levels = [
+            {
+                title: "Level 1: 1D Patterns (Lines)",
+                instructions: "Look at this pattern of lines and dots. What comes next?",
+                pattern: ['-', '.', '-', '.'],
+                placeholder: '?',
+                options: ['-', '.', '□'], // Wrong option included
+                correct: 0 // Index of correct option
+            },
+            {
+                title: "Level 2: 2D Patterns (Flat Shapes)",
+                instructions: "See the repeating flat shapes. Choose the next one!",
+                pattern: ['○', '□', '△', '○', '□'],
+                placeholder: '?',
+                options: ['△', '○', '◇'], // Wrong options
+                correct: 0
+            },
+            {
+                title: "Level 3: Intro to 3D Patterns",
+                instructions: "Now, patterns with 3D objects! Cube, Sphere, Cube... Next?",
+                pattern: ['⬜', '○', '⬜'], // Using emojis for 3D approx
+                placeholder: '?',
+                options: ['○', '⬜', '⭐'], // Wrong option
+                correct: 0
+            }
+        ];
+        // Initialize audio
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        // Play sound
+        function playSound(frequency, duration, type = 'sine') {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        // Start game
+        function startGame() {
+            currentLevel = 0;
+            score = 0;
+            document.getElementById('welcomeScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+            loadLevel();
+        }
+        // Load level
+        function loadLevel() {
+            if (currentLevel >= totalLevels) {
+                showSuccess();
+                return;
+            }
+            const level = levels[currentLevel];
+            document.getElementById('levelTitle').textContent = level.title;
+            document.getElementById('levelInstructions').textContent = level.instructions;
+            const patternContainer = document.getElementById('patternContainer');
+            patternContainer.innerHTML = '';
+            level.pattern.forEach((shape, index) => {
+                const shapeEl = document.createElement('div');
+                shapeEl.className = 'shape';
+                shapeEl.textContent = shape;
+                shapeEl.setAttribute('role', 'img');
+                shapeEl.setAttribute('aria-label', `Shape: ${shape}`);
+                shapeEl.tabIndex = 0;
+                patternContainer.appendChild(shapeEl);
+            });
+            // Add placeholder
+            const placeholder = document.createElement('div');
+            placeholder.className = 'shape-placeholder';
+            placeholder.textContent = level.placeholder;
+            placeholder.setAttribute('aria-label', 'Next shape placeholder');
+            patternContainer.appendChild(placeholder);
+            // Options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            level.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option-shape';
+                optionEl.textContent = option;
+                optionEl.setAttribute('role', 'button');
+                optionEl.setAttribute('aria-label', `Option ${index + 1}: ${option}`);
+                optionEl.tabIndex = 0;
+                optionEl.onclick = () => selectOption(index);
+                optionEl.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') selectOption(index); };
+                optionsContainer.appendChild(optionEl);
+            });
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('feedback').textContent = '';
+            selectedOption = null;
+            updateProgress();
+        }
+        // Select option
+        function selectOption(index) {
+            // Deselect previous
+            document.querySelectorAll('.option-shape').forEach(el => el.classList.remove('selected'));
+            // Select new
+            const selectedEl = document.querySelectorAll('.option-shape')[index];
+            selectedEl.classList.add('selected');
+            selectedOption = index;
+            document.getElementById('submitBtn').disabled = false;
+            playSound(440, 0.1); // Click sound
+        }
+        // Submit answer
+        function submitAnswer() {
+            if (selectedOption === null) return;
+            const level = levels[currentLevel];
+            const feedback = document.getElementById('feedback');
+            const placeholder = document.querySelector('.shape-placeholder');
+            const submitBtn = document.getElementById('submitBtn');
+            if (selectedOption === level.correct) {
+                score++;
+                feedback.textContent = 'Correct! Great pattern spotting!';
+                feedback.style.color = '#4CAF50';
+                placeholder.textContent = level.options[selectedOption];
+                placeholder.classList.add('shape', 'correct');
+                placeholder.classList.remove('shape-placeholder');
+                playSound(523, 0.5, 'sine'); // Success sound
+                submitBtn.style.display = 'none';
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            } else {
+                feedback.textContent = 'Try again! Look closely at the pattern.';
+                feedback.style.color = '#f44336';
+                const selectedEl = document.querySelector('.option-shape.selected');
+                selectedEl.classList.add('incorrect');
+                playSound(220, 0.3, 'square'); // Error sound
+                setTimeout(() => {
+                    selectedEl.classList.remove('incorrect', 'selected');
+                    selectedOption = null;
+                    submitBtn.disabled = true;
+                }, 1000);
+            }
+        }
+        // Next level
+        function nextLevel() {
+            currentLevel++;
+            loadLevel();
+        }
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentLevel + 1) / totalLevels) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        // Show success
+        function showSuccess() {
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('successScreen').classList.add('active');
+            playSound(659, 0.5); // Celebration sound
+        }
+        // Replay
+        function replayGame() {
+            document.getElementById('successScreen').classList.remove('active');
+            startGame();
+        }
+        // Exit (just hide game for demo)
+        function exitGame() {
+            document.getElementById('successScreen').classList.remove('active');
+            document.getElementById('welcomeScreen').classList.add('active');
+        }
+        // Keyboard navigation support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('gameScreen').classList.contains('active')) {
+                    nextLevel(); // Or pause, but for simplicity
+                }
+            }
+        });
+        // Error handling: Graceful degradation for audio
+        window.addEventListener('error', (e) => {
+            console.warn('Error caught:', e.message);
+            // Continue without audio if failed
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Pattern Spotter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            line-height: 1.6;
+        }
+        #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4a90e2;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #4a90e2;
+            font-size: 1.8em;
+        }
+        p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: white;
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+        }
+        #options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .option {
+            cursor: pointer;
+            text-align: center;
+            border: 2px solid #ccc;
+            padding: 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background-color: white;
+            min-width: 120px;
+        }
+        .option:hover {
+            transform: scale(1.05);
+            border-color: #4a90e2;
+        }
+        .option canvas {
+            margin: 0 auto 10px;
+        }
+        .option p {
+            margin: 5px 0 0;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+            transform: scale(1.1);
+        }
+        .wrong {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+            transform: scale(0.95);
+        }
+        #feedback {
+            font-size: 1.4em;
+            margin: 20px 0;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .feedback.correct {
+            color: #28a745;
+            background-color: #d4edda;
+        }
+        .feedback.wrong {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+        #progress {
+            font-size: 1.2em;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+        .screen {
+            display: none;
+        }
+        #welcome-screen, #success-screen {
+            display: block;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            #options {
+                gap: 10px;
+            }
+            .option {
+                min-width: 100px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="welcome-screen" class="screen">
+            <h1>Polygon Pattern Spotter</h1>
+            <p>Game 2 of 10</p>
+            <p>Look at the sequence of regular polygons. Each next polygon has one more side than the previous. Your job is to spot the pattern and choose the polygon that comes next!</p>
+            <p>Learning Goal: Recognize polygons by their number of sides (from triangle to decagon).</p>
+            <button id="start-btn">Start Game</button>
+        </div>
+        <div id="game-screen" class="screen">
+            <div id="progress"></div>
+            <h2 id="challenge-text">What comes next in the sequence?</h2>
+            <canvas id="sequence-canvas" width="800" height="200" aria-label=""></canvas>
+            <div id="options"></div>
+            <div id="feedback"></div>
+        </div>
+        <div id="success-screen" class="screen">
+            <h1>Congratulations!</h1>
+            <p>You've spotted all the polygon patterns perfectly! Great job building your geometry skills.</p>
+            <p>Ready for more? This prepares you for extending polygon sequences in the next games.</p>
+            <button id="replay-btn">Play Again</button>
+        </div>
+    </div>
+    <script>
+        const polygonNames = {
+            3: 'Triangle (3 sides)',
+            4: 'Quadrilateral (4 sides)',
+            5: 'Pentagon (5 sides)',
+            6: 'Hexagon (6 sides)',
+            7: 'Heptagon (7 sides)',
+            8: 'Octagon (8 sides)',
+            9: 'Nonagon (9 sides)',
+            10: 'Decagon (10 sides)'
+        };
+        const levels = [
+            {seq: [3, 4], next: 5, options: [3, 5, 6]},
+            {seq: [3, 4, 5], next: 6, options: [4, 6, 7]},
+            {seq: [3, 4, 5, 6], next: 7, options: [5, 7, 8]},
+            {seq: [4, 5, 6, 7], next: 8, options: [6, 8, 9]},
+            {seq: [5, 6, 7, 8, 9], next: 10, options: [7, 9, 10]}
+        ];
+        let currentLevel = 0;
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+        }
+        function playTone(frequency, duration = 300) {
+            if (!audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + duration / 1000);
+            } catch (e) {
+                // Graceful degradation
+            }
+        }
+        function drawPolygon(ctx, n, x, y, radius, color = '#4CAF50') {
+            if (n < 3) return;
+            ctx.beginPath();
+            ctx.moveTo(x + radius * Math.cos(-Math.PI / 2), y + radius * Math.sin(-Math.PI / 2));
+            for (let i = 1; i < n; i++) {
+                const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+                ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        function createOption(sides) {
+            const div = document.createElement('div');
+            div.className = 'option';
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            drawPolygon(ctx, sides, 40, 40, 30);
+            const p = document.createElement('p');
+            p.textContent = polygonNames[sides];
+            div.appendChild(canvas);
+            div.appendChild(p);
+            div.addEventListener('click', function() {
+                selectOption(sides, this);
+            });
+            return div;
+        }
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        function loadLevel(idx) {
+            const level = levels[idx];
+            const canvas = document.getElementById('sequence-canvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#F7DC6F'];
+            const padding = 50;
+            const spacing = level.seq.length > 1 ? (w - 2 * padding) / (level.seq.length - 1) : w / 2;
+            const startX = padding;
+            const radius = 60;
+            const y = h / 2;
+            level.seq.forEach((sides, i) => {
+                const x = startX + i * spacing;
+                drawPolygon(ctx, sides, x, y, radius, colors[i % colors.length]);
+            });
+            const seqDesc = level.seq.map(s => polygonNames[s].split(' (')[0]).join(', ');
+            canvas.setAttribute('aria-label', `Sequence of polygons: ${seqDesc}. Each has one more side than the previous. What comes next?`);
+            document.getElementById('progress').textContent = `Level ${idx + 1} of ${levels.length}`;
+            document.getElementById('options').innerHTML = '';
+            const opts = shuffle([...level.options]);
+            opts.forEach(sides => {
+                document.getElementById('options').appendChild(createOption(sides));
+            });
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = '';
+        }
+        function selectOption(selectedSides, clickedDiv) {
+            const level = levels[currentLevel];
+            const feedback = document.getElementById('feedback');
+            if (selectedSides === level.next) {
+                playTone(800, 300);
+                feedback.textContent = 'Correct! Great job spotting the pattern!';
+                feedback.className = 'feedback correct';
+                clickedDiv.classList.add('correct');
+                setTimeout(() => {
+                    if (currentLevel + 1 < levels.length) {
+                        loadLevel(currentLevel + 1);
+                    } else {
+                        showScreen('success-screen');
+                    }
+                }, 1500);
+            } else {
+                playTone(400, 300);
+                feedback.textContent = 'Not quite right. Remember, each polygon has one more side. Try again!';
+                feedback.className = 'feedback wrong';
+                clickedDiv.classList.add('wrong');
+                setTimeout(() => {
+                    clickedDiv.classList.remove('wrong');
+                    feedback.textContent = '';
+                    feedback.className = '';
+                }, 1000);
+            }
+        }
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            document.getElementById(screenId).style.display = 'block';
+        }
+        // Event listeners
+        document.getElementById('start-btn').addEventListener('click', () => {
+            initAudio();
+            showScreen('game-screen');
+            loadLevel(0);
+        });
+        document.getElementById('replay-btn').addEventListener('click', () => {
+            currentLevel = 0;
+            showScreen('game-screen');
+            loadLevel(0);
+        });
+        // Responsive resize for canvas (optional redraw not implemented for simplicity, CSS handles scaling)
+        window.addEventListener('resize', () => {
+            // Canvas scales via CSS
+        });
+    </script>
+</body>
+</html>

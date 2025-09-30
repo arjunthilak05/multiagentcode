@@ -1,0 +1,180 @@
+{
+  "source_content": {
+    "file_path": "extract (1).txt",
+    "content_preview": "Extracted Text :\n\n1.5 Patterns in Shapes\nOther important and basic patterns that occur in Mathematics\nare patterns of shapes. These shapes may be in one, two, or three\ndimensions (1D, 2D, or 3D)\n—\nor ..."
+  },
+  "system_overview": {
+    "total_screens": 10,
+    "estimated_total_time": "52-65 minutes",
+    "difficulty_progression": "Very Easy → Easy → Medium → Hard → Creative",
+    "learning_path": [
+      "What are Patterns?",
+      "Meet the Shapes!",
+      "Count the Sides!",
+      "Shape Trains!",
+      "The Polygon Family",
+      "Patterns That Grow!",
+      "Pattern Detective!",
+      "Pattern Creator!",
+      "Amazing Fractals!",
+      "Pattern Master Challenge!"
+    ],
+    "key_concepts": [
+      "Regular Polygons Classification",
+      "Growing Sequences",
+      "Pattern Creation",
+      "Polygon Side Counting",
+      "Pattern Rule Discovery",
+      "Comprehensive Pattern Skills",
+      "Basic Shape Sequences",
+      "Pattern Recognition Basics",
+      "Introduction to Fractals",
+      "Basic Geometric Shapes"
+    ]
+  },
+  "mini_games": [
+    {
+      "screen_number": 1,
+      "title": "What are Patterns?",
+      "concept": "Pattern Recognition Basics",
+      "learning_objective": "Understand what patterns are in mathematics",
+      "content_text": "Patterns are everywhere in math! A pattern is something that repeats or follows a rule. Let's learn to spot them!",
+      "game_type": "introduction",
+      "game_mechanics": "Click on objects that show patterns. Simple visual examples with everyday objects.",
+      "difficulty": "Very Easy",
+      "estimated_time": "2-3 minutes",
+      "success_criteria": "Identify 3 out of 4 pattern examples correctly",
+      "next_screen_unlock": "Complete pattern identification task"
+    },
+    {
+      "screen_number": 2,
+      "title": "Meet the Shapes!",
+      "concept": "Basic Geometric Shapes",
+      "learning_objective": "Identify and name basic shapes: triangle, square, pentagon, hexagon",
+      "content_text": "Let's meet our shape friends! Each shape has a special number of sides. Triangle has 3, square has 4, and so on!",
+      "game_type": "shape_matching",
+      "game_mechanics": "Drag shape names to match with the correct shapes. Interactive shape gallery with animations.",
+      "difficulty": "Easy",
+      "estimated_time": "3-4 minutes",
+      "success_criteria": "Match all 4 basic shapes correctly",
+      "next_screen_unlock": "Match all shapes with their names"
+    },
+    {
+      "screen_number": 3,
+      "title": "Count the Sides!",
+      "concept": "Polygon Side Counting",
+      "learning_objective": "Count sides of polygons and understand the relationship between sides and shape names",
+      "content_text": "Every polygon has sides! Let's count them together. Triangle = 3 sides, Square = 4 sides. Can you count more?",
+      "game_type": "counting_game",
+      "game_mechanics": "Click on each side of a shape to count. Numbers appear as you click. Audio feedback for each count.",
+      "difficulty": "Easy",
+      "estimated_time": "3-4 minutes",
+      "success_criteria": "Count sides correctly for 5 different polygons",
+      "next_screen_unlock": "Successfully count sides of all presented shapes"
+    },
+    {
+      "screen_number": 4,
+      "title": "Shape Trains!",
+      "concept": "Basic Shape Sequences",
+      "learning_objective": "Recognize and continue simple shape sequences (triangle, square, triangle, square...)",
+      "content_text": "Shapes can make trains! Look at the pattern: triangle, square, triangle, square... What comes next?",
+      "game_type": "sequence_completion",
+      "game_mechanics": "Drag the correct shape to complete the train. Visual feedback with train animation when correct.",
+      "difficulty": "Easy-Medium",
+      "estimated_time": "4-5 minutes",
+      "success_criteria": "Complete 3 different shape sequence trains",
+      "next_screen_unlock": "Complete all sequence trains correctly"
+    },
+    {
+      "screen_number": 5,
+      "title": "The Polygon Family",
+      "concept": "Regular Polygons Classification",
+      "learning_objective": "Learn names of polygons from triangle to decagon and their side counts",
+      "content_text": "Meet the Polygon Family! From Triangle (3 sides) to Decagon (10 sides). Each has a special name!",
+      "game_type": "family_tree",
+      "game_mechanics": "Build a family tree by placing polygons in order of side count. Interactive family portrait.",
+      "difficulty": "Medium",
+      "estimated_time": "5-6 minutes",
+      "success_criteria": "Place all polygons in correct order from 3 to 10 sides",
+      "next_screen_unlock": "Build complete polygon family tree"
+    },
+    {
+      "screen_number": 6,
+      "title": "Patterns That Grow!",
+      "concept": "Growing Sequences",
+      "learning_objective": "Understand how patterns can grow bigger (stacked squares, triangular numbers)",
+      "content_text": "Some patterns grow! Like building blocks getting taller, or triangles getting bigger. Let's build growing patterns!",
+      "game_type": "building_game",
+      "game_mechanics": "Stack blocks to continue growing patterns. Drag and drop interface with snap-to-grid.",
+      "difficulty": "Medium",
+      "estimated_time": "5-6 minutes",
+      "success_criteria": "Build 3 different growing patterns correctly",
+      "next_screen_unlock": "Successfully build all growing pattern challenges"
+    },
+    {
+      "screen_number": 7,
+      "title": "Pattern Detective!",
+      "concept": "Pattern Rule Discovery",
+      "learning_objective": "Identify and describe the rules that create different patterns",
+      "content_text": "Be a Pattern Detective! Look carefully at sequences and discover the secret rules that make them work!",
+      "game_type": "detective_game",
+      "game_mechanics": "Examine pattern clues and choose the correct rule from multiple choice options. Detective theme with magnifying glass.",
+      "difficulty": "Medium-Hard",
+      "estimated_time": "6-7 minutes",
+      "success_criteria": "Solve 4 out of 5 pattern mysteries correctly",
+      "next_screen_unlock": "Solve the majority of pattern mysteries"
+    },
+    {
+      "screen_number": 8,
+      "title": "Pattern Creator!",
+      "concept": "Pattern Creation",
+      "learning_objective": "Create original patterns using learned concepts and explain the rules",
+      "content_text": "Now YOU are the Pattern Master! Create your own amazing patterns and challenge your friends!",
+      "game_type": "creation_sandbox",
+      "game_mechanics": "Free-form pattern creation tool with shape palette. Save and share creations.",
+      "difficulty": "Creative",
+      "estimated_time": "8-10 minutes",
+      "success_criteria": "Create and explain one original pattern",
+      "next_screen_unlock": "Create a valid pattern with explainable rule"
+    },
+    {
+      "screen_number": 9,
+      "title": "Amazing Fractals!",
+      "concept": "Introduction to Fractals",
+      "learning_objective": "Explore complex patterns like Koch Snowflake and understand self-similarity",
+      "content_text": "Some patterns are SUPER special! They repeat inside themselves forever. These are called fractals - nature's magic patterns!",
+      "game_type": "fractal_explorer",
+      "game_mechanics": "Interactive fractal viewer with zoom controls. Click to explore different parts of the Koch Snowflake.",
+      "difficulty": "Advanced",
+      "estimated_time": "6-8 minutes",
+      "success_criteria": "Explore 3 different zoom levels of fractal patterns",
+      "next_screen_unlock": "Explore all fractal zoom levels"
+    },
+    {
+      "screen_number": 10,
+      "title": "Pattern Master Challenge!",
+      "concept": "Comprehensive Pattern Skills",
+      "learning_objective": "Apply all learned concepts in a comprehensive challenge",
+      "content_text": "You've learned so much! Now prove you're a true Pattern Master by solving the ultimate pattern challenges!",
+      "game_type": "final_challenge",
+      "game_mechanics": "Mixed challenges combining all previous concepts. Timed challenges with increasing difficulty.",
+      "difficulty": "Hard",
+      "estimated_time": "10-12 minutes",
+      "success_criteria": "Score 80% or higher on mixed pattern challenges",
+      "next_screen_unlock": "Achieve Pattern Master status"
+    }
+  ],
+  "game_prompts": {
+    "screen_1": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 1: What are Patterns?\n\nCONCEPT TO TEACH: Pattern Recognition Basics\nLEARNING OBJECTIVE: Understand what patterns are in mathematics\nCONTENT: Patterns are everywhere in math! A pattern is something that repeats or follows a rule. Let's learn to spot them!\n\nGAME TYPE: introduction\nMECHANICS: Click on objects that show patterns. Simple visual examples with everyday objects.\nDIFFICULTY: Very Easy\nTIME LIMIT: 2-3 minutes\n\nSUCCESS CRITERIA: Identify 3 out of 4 pattern examples correctly\nUNLOCK CONDITION: Complete pattern identification task\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 2-3 minutes but engaging enough to maintain student interest.\n",
+    "screen_2": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 2: Meet the Shapes!\n\nCONCEPT TO TEACH: Basic Geometric Shapes\nLEARNING OBJECTIVE: Identify and name basic shapes: triangle, square, pentagon, hexagon\nCONTENT: Let's meet our shape friends! Each shape has a special number of sides. Triangle has 3, square has 4, and so on!\n\nGAME TYPE: shape_matching\nMECHANICS: Drag shape names to match with the correct shapes. Interactive shape gallery with animations.\nDIFFICULTY: Easy\nTIME LIMIT: 3-4 minutes\n\nSUCCESS CRITERIA: Match all 4 basic shapes correctly\nUNLOCK CONDITION: Match all shapes with their names\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 3-4 minutes but engaging enough to maintain student interest.\n",
+    "screen_3": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 3: Count the Sides!\n\nCONCEPT TO TEACH: Polygon Side Counting\nLEARNING OBJECTIVE: Count sides of polygons and understand the relationship between sides and shape names\nCONTENT: Every polygon has sides! Let's count them together. Triangle = 3 sides, Square = 4 sides. Can you count more?\n\nGAME TYPE: counting_game\nMECHANICS: Click on each side of a shape to count. Numbers appear as you click. Audio feedback for each count.\nDIFFICULTY: Easy\nTIME LIMIT: 3-4 minutes\n\nSUCCESS CRITERIA: Count sides correctly for 5 different polygons\nUNLOCK CONDITION: Successfully count sides of all presented shapes\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 3-4 minutes but engaging enough to maintain student interest.\n",
+    "screen_4": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 4: Shape Trains!\n\nCONCEPT TO TEACH: Basic Shape Sequences\nLEARNING OBJECTIVE: Recognize and continue simple shape sequences (triangle, square, triangle, square...)\nCONTENT: Shapes can make trains! Look at the pattern: triangle, square, triangle, square... What comes next?\n\nGAME TYPE: sequence_completion\nMECHANICS: Drag the correct shape to complete the train. Visual feedback with train animation when correct.\nDIFFICULTY: Easy-Medium\nTIME LIMIT: 4-5 minutes\n\nSUCCESS CRITERIA: Complete 3 different shape sequence trains\nUNLOCK CONDITION: Complete all sequence trains correctly\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 4-5 minutes but engaging enough to maintain student interest.\n",
+    "screen_5": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 5: The Polygon Family\n\nCONCEPT TO TEACH: Regular Polygons Classification\nLEARNING OBJECTIVE: Learn names of polygons from triangle to decagon and their side counts\nCONTENT: Meet the Polygon Family! From Triangle (3 sides) to Decagon (10 sides). Each has a special name!\n\nGAME TYPE: family_tree\nMECHANICS: Build a family tree by placing polygons in order of side count. Interactive family portrait.\nDIFFICULTY: Medium\nTIME LIMIT: 5-6 minutes\n\nSUCCESS CRITERIA: Place all polygons in correct order from 3 to 10 sides\nUNLOCK CONDITION: Build complete polygon family tree\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 5-6 minutes but engaging enough to maintain student interest.\n",
+    "screen_6": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 6: Patterns That Grow!\n\nCONCEPT TO TEACH: Growing Sequences\nLEARNING OBJECTIVE: Understand how patterns can grow bigger (stacked squares, triangular numbers)\nCONTENT: Some patterns grow! Like building blocks getting taller, or triangles getting bigger. Let's build growing patterns!\n\nGAME TYPE: building_game\nMECHANICS: Stack blocks to continue growing patterns. Drag and drop interface with snap-to-grid.\nDIFFICULTY: Medium\nTIME LIMIT: 5-6 minutes\n\nSUCCESS CRITERIA: Build 3 different growing patterns correctly\nUNLOCK CONDITION: Successfully build all growing pattern challenges\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 5-6 minutes but engaging enough to maintain student interest.\n",
+    "screen_7": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 7: Pattern Detective!\n\nCONCEPT TO TEACH: Pattern Rule Discovery\nLEARNING OBJECTIVE: Identify and describe the rules that create different patterns\nCONTENT: Be a Pattern Detective! Look carefully at sequences and discover the secret rules that make them work!\n\nGAME TYPE: detective_game\nMECHANICS: Examine pattern clues and choose the correct rule from multiple choice options. Detective theme with magnifying glass.\nDIFFICULTY: Medium-Hard\nTIME LIMIT: 6-7 minutes\n\nSUCCESS CRITERIA: Solve 4 out of 5 pattern mysteries correctly\nUNLOCK CONDITION: Solve the majority of pattern mysteries\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 6-7 minutes but engaging enough to maintain student interest.\n",
+    "screen_8": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 8: Pattern Creator!\n\nCONCEPT TO TEACH: Pattern Creation\nLEARNING OBJECTIVE: Create original patterns using learned concepts and explain the rules\nCONTENT: Now YOU are the Pattern Master! Create your own amazing patterns and challenge your friends!\n\nGAME TYPE: creation_sandbox\nMECHANICS: Free-form pattern creation tool with shape palette. Save and share creations.\nDIFFICULTY: Creative\nTIME LIMIT: 8-10 minutes\n\nSUCCESS CRITERIA: Create and explain one original pattern\nUNLOCK CONDITION: Create a valid pattern with explainable rule\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 8-10 minutes but engaging enough to maintain student interest.\n",
+    "screen_9": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 9: Amazing Fractals!\n\nCONCEPT TO TEACH: Introduction to Fractals\nLEARNING OBJECTIVE: Explore complex patterns like Koch Snowflake and understand self-similarity\nCONTENT: Some patterns are SUPER special! They repeat inside themselves forever. These are called fractals - nature's magic patterns!\n\nGAME TYPE: fractal_explorer\nMECHANICS: Interactive fractal viewer with zoom controls. Click to explore different parts of the Koch Snowflake.\nDIFFICULTY: Advanced\nTIME LIMIT: 6-8 minutes\n\nSUCCESS CRITERIA: Explore 3 different zoom levels of fractal patterns\nUNLOCK CONDITION: Explore all fractal zoom levels\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 6-8 minutes but engaging enough to maintain student interest.\n",
+    "screen_10": "\nCreate a simple, focused HTML5 educational mini-game for Grade 6 students:\n\nSCREEN 10: Pattern Master Challenge!\n\nCONCEPT TO TEACH: Comprehensive Pattern Skills\nLEARNING OBJECTIVE: Apply all learned concepts in a comprehensive challenge\nCONTENT: You've learned so much! Now prove you're a true Pattern Master by solving the ultimate pattern challenges!\n\nGAME TYPE: final_challenge\nMECHANICS: Mixed challenges combining all previous concepts. Timed challenges with increasing difficulty.\nDIFFICULTY: Hard\nTIME LIMIT: 10-12 minutes\n\nSUCCESS CRITERIA: Score 80% or higher on mixed pattern challenges\nUNLOCK CONDITION: Achieve Pattern Master status\n\nREQUIREMENTS:\n- Single HTML file with embedded CSS/JS\n- Child-friendly, colorful interface\n- Clear instructions and feedback\n- Progress tracking for this screen\n- Simple, intuitive controls\n- Audio/visual feedback for actions\n- Accessibility features\n- Mobile-friendly design\n\nEDUCATIONAL FEATURES:\n- Immediate feedback on actions\n- Encouraging messages for progress\n- Visual demonstrations of concepts\n- Step-by-step guidance\n- Celebration of achievements\n\nGenerate a complete, working mini-game that teaches this specific concept effectively.\nThe game should be simple enough to complete in 10-12 minutes but engaging enough to maintain student interest.\n"
+  },
+  "implementation_guide": "\nPROGRESSIVE LEARNING GAME SYSTEM IMPLEMENTATION GUIDE\n\nOVERVIEW:\n- 10 interconnected mini-games\n- Progressive difficulty and concept building\n- Each screen unlocks the next upon completion\n- Comprehensive progress tracking across all screens\n\nTECHNICAL ARCHITECTURE:\n1. Main Menu Screen: Shows progress and available screens\n2. Individual Game Screens: Each is a separate HTML file or section\n3. Progress Manager: Tracks completion and unlocks\n4. Assessment System: Monitors learning effectiveness\n\nSCREEN PROGRESSION:\n1. What are Patterns? → Complete pattern identification task\n2. Meet the Shapes! → Match all shapes with their names\n3. Count the Sides! → Successfully count sides of all presented shapes\n4. Shape Trains! → Complete all sequence trains correctly\n5. The Polygon Family → Build complete polygon family tree\n6. Patterns That Grow! → Successfully build all growing pattern challenges\n7. Pattern Detective! → Solve the majority of pattern mysteries\n8. Pattern Creator! → Create a valid pattern with explainable rule\n9. Amazing Fractals! → Explore all fractal zoom levels\n10. Pattern Master Challenge! → Achieve Pattern Master status\n\nIMPLEMENTATION STEPS:\n1. Generate each mini-game using the provided prompts\n2. Create a main navigation system\n3. Implement progress tracking with localStorage\n4. Add unlock mechanics between screens\n5. Create teacher dashboard for monitoring student progress\n\nEDUCATIONAL EFFECTIVENESS:\n- Each screen focuses on ONE concept\n- Immediate feedback and encouragement\n- Visual and interactive learning\n- Progressive skill building\n- Creative expression opportunities\n\nASSESSMENT INTEGRATION:\n- Track time spent on each screen\n- Monitor success rates and retry patterns\n- Identify concepts that need reinforcement\n- Generate progress reports for teachers\n"
+}

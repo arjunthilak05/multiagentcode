@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Bigger Squares</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            color: #333;
+        }
+        #welcome, #game, #success {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        p {
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 10px;
+        }
+        button:hover, button:focus {
+            background: #45a049;
+            outline: 2px solid #4CAF50;
+        }
+        #stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .layer {
+            display: flex;
+            justify-content: center;
+            margin: 3px 0;
+        }
+        .square {
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            margin: 2px;
+            display: inline-block;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #options {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .option-layer {
+            cursor: pointer;
+            padding: 10px;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .option-layer:hover, .option-layer:focus {
+            transform: scale(1.05);
+            border-color: #4CAF50;
+            outline: 2px solid #4CAF50;
+        }
+        .option-layer .square {
+            background: #CCCCCC;
+        }
+        .wrong {
+            border-color: #f44336 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .adding {
+            animation: slideUp 0.5s ease;
+        }
+        #feedback {
+            min-height: 50px;
+            font-size: 1.1em;
+            color: #4CAF50;
+            aria-live: polite;
+        }
+        #total {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        #progress {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            .square {
+                width: 4vw;
+                height: 4vw;
+                min-width: 20px;
+                min-height: 20px;
+                margin: 1px;
+            }
+            .layer {
+                margin: 2px 0;
+            }
+            #options {
+                flex-direction: column;
+                align-items: center;
+            }
+            .option-layer {
+                margin: 5px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress" style="display: none;">Level <span id="levelnum">1</span>/3</div>
+    <div id="welcome">
+        <h1>Build Bigger Squares 🎲</h1>
+        <p>Welcome to Game 7 of 10: Build Bigger Squares!</p>
+        <p>In stacked squares sequences, we build perfect squares by adding layers. Each new layer has 2 more squares than the last (odd numbers: 1, 3, 5, 7...).</p>
+        <p>The total number of squares after n layers is always n²! Choose the correct layer to add and watch the stack grow.</p>
+        <p>Click or tap the right option to add the layer. You'll get feedback right away!</p>
+        <button id="start">Start Building! 🚀</button>
+    </div>
+    <div id="game" style="display: none;">
+        <div id="stack"></div>
+        <div id="options"></div>
+        <div id="feedback" aria-live="polite"></div>
+        <div id="total"></div>
+    </div>
+    <div id="success" style="display: none;">
+        <h1>🎉 You Did It!</h1>
+        <p>Congratulations! You built up to a 4x4 square with 16 blocks. 🎊</p>
+        <p>The growth rule: Sum of the first n odd numbers (1 + 3 + 5 + ... + (2n-1)) = n². This helps recognize patterns in squares!</p>
+        <p>Great job extending the stacked squares sequence!</p>
+        <button id="replay">Build Again! 🔄</button>
+    </div>
+    <script>
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+        const levels = [
+            {
+                current: [1],
+                next: 3,
+                total: 4,
+                n: 2,
+                explanation: "Great job! 🎉 By adding 3 squares, you've built a 2 by 2 square!"
+            },
+            {
+                current: [1, 3],
+                next: 5,
+                total: 9,
+                n: 3,
+                explanation: "Awesome! Adding 5 more makes a 3 by 3 square!"
+            },
+            {
+                current: [1, 3, 5],
+                next: 7,
+                total: 16,
+                n: 4,
+                explanation: "Fantastic! With 7 more, now you have a 4 by 4 square! 🌟"
+            }
+        ];
+        let currentLevel = 0;
+        let audioCtx;
+        function playSound(freq, duration) {
+            if (!audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + duration / 1000);
+            } catch (e) {
+                // Graceful degradation: no sound if error
+            }
+        }
+        function createLayer(len, color = '#4CAF50') {
+            const layerDiv = document.createElement('div');
+            layerDiv.className = 'layer';
+            for (let i = 0; i < len; i++) {
+                const sq = document.createElement('div');
+                sq.className = 'square';
+                sq.style.backgroundColor = color;
+                layerDiv.appendChild(sq);
+            }
+            return layerDiv;
+        }
+        function renderStack(layers) {
+            const stack = document.getElementById('stack');
+            stack.innerHTML = '';
+            layers.forEach((len, index) => {
+                const color = colors[index % colors.length];
+                const layerDiv = createLayer(len, color);
+                stack.appendChild(layerDiv);
+            });
+            document.getElementById('total').innerHTML = `<div>Total squares so far: ${layers.reduce((a, b) => a + b, 0)}</div>`;
+        }
+        function createOptions(correct) {
+            const options = document.getElementById('options');
+            options.innerHTML = '';
+            const opts = [correct - 2, correct, correct + 2].filter(o => o > 0);
+            opts.forEach(num => {
+                const optDiv = document.createElement('div');
+                optDiv.className = 'option-layer';
+                optDiv.dataset.num = num;
+                optDiv.setAttribute('role', 'button');
+                optDiv.setAttribute('tabindex', '0');
+                optDiv.setAttribute('aria-label', `Add a layer of ${num} squares`);
+                const optLayer = createLayer(num, '#CCCCCC');
+                optDiv.appendChild(optLayer);
+                optDiv.addEventListener('click', handleOptionClick);
+                optDiv.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleOptionClick.call(optDiv);
+                    }
+                });
+                options.appendChild(optDiv);
+            });
+        }
+        function handleOptionClick() {
+            const num = parseInt(this.dataset.num);
+            const lvl = levels[currentLevel];
+            const feedback = document.getElementById('feedback');
+            if (num === lvl.next) {
+                playSound(440, 200); // Correct sound
+                const stack = document.getElementById('stack');
+                const color = colors[lvl.current.length % colors.length];
+                const newLayer = createLayer(num, color);
+                newLayer.style.transform = 'translateY(50px)';
+                newLayer.style.opacity = '0';
+                newLayer.classList.add('adding');
+                stack.appendChild(newLayer);
+                setTimeout(() => {
+                    newLayer.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+                    newLayer.style.transform = 'translateY(0)';
+                    newLayer.style.opacity = '1';
+                    newLayer.classList.remove('adding');
+                }, 50);
+                setTimeout(() => {
+                    lvl.current.push(num);
+                    feedback.innerHTML = `<p>${lvl.explanation}</p><p>Total: ${lvl.total} squares (that's ${lvl.n}²!) 🎊</p>`;
+                    playSound(523, 300); // Celebration sound
+                    document.getElementById('total').innerHTML = `<div>Total squares: ${lvl.total} = ${lvl.n}²</div>`;
+                    if (currentLevel < levels.length - 1) {
+                        setTimeout(() => {
+                            currentLevel++;
+                            initLevel();
+                        }, 3000);
+                    } else {
+                        setTimeout(() => {
+                            showSuccess();
+                        }, 3000);
+                    }
+                }, 600);
+            } else {
+                playSound(220, 200); // Wrong sound
+                this.classList.add('wrong');
+                setTimeout(() => {
+                    this.classList.remove('wrong');
+                }, 500);
+                feedback.innerHTML = '<p>Try again! The next layer needs more squares to build the bigger square. 💪</p>';
+            }
+        }
+        function initLevel() {
+            const lvl = levels[currentLevel];
+            renderStack(lvl.current);
+            createOptions(lvl.next);
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('levelnum').textContent = currentLevel + 1;
+            document.getElementById('progress').style.display = 'block';
+        }
+        function showSuccess() {
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+            document.getElementById('progress').style.display = 'none';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof (window.AudioContext || window.webkitAudioContext) !== 'undefined') {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            document.getElementById('start').addEventListener('click', () => {
+                document.getElementById('welcome').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                document.getElementById('progress').style.display = 'block';
+                initLevel();
+            });
+            document.getElementById('replay').addEventListener('click', () => {
+                document.getElementById('success').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                currentLevel = 0;
+                initLevel();
+            });
+        });
+    </script>
+</body>
+</html>

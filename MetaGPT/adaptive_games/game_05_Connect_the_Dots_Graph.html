@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect the Dots Graph</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        #container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        p, #instructions, #feedback {
+            text-align: center;
+            font-size: 1.2em;
+            color: #fff;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:hover, button:focus {
+            background: #45a049;
+            transform: scale(1.05);
+            outline: 3px solid #fff;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #game, #quiz, #summary {
+            display: none;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        #graph {
+            width: 100%;
+            height: 400px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+            touch-action: none;
+        }
+        #level {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+        #progress {
+            width: 100%;
+            height: 20px;
+            margin: 20px 0;
+        }
+        .vertex {
+            cursor: pointer;
+            stroke: #333;
+            stroke-width: 2;
+            transition: fill 0.3s, r 0.3s;
+            pointer-events: all;
+        }
+        .vertex:hover, .vertex:focus {
+            fill: #4CAF50;
+            r: 12;
+            outline: 2px solid #fff;
+        }
+        .edge {
+            stroke: #4CAF50;
+            stroke-width: 3;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .edge.complete {
+            opacity: 1;
+        }
+        .edge.invalid {
+            stroke: #f44336;
+            animation: flash 0.5s;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .pulse {
+            animation: pulse 1s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { r: 10; }
+            50% { r: 15; }
+            100% { r: 10; }
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 100px;
+            margin: 10px;
+        }
+        .option {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background: #e7f3ff;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .option:hover, .option.selected {
+            background: #4CAF50;
+            color: white;
+        }
+        #welcome, #summary {
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            #graph { height: 300px; }
+            p, #instructions { font-size: 1em; }
+            button { padding: 12px 24px; font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="welcome">
+            <h1>Connect the Dots Graph</h1>
+            <p>Welcome to Game 5: Learn about Complete Graphs (K<sub>n</sub>)!</p>
+            <p>A complete graph connects every dot (vertex) to every other dot with a line (edge). Your goal: Connect all dots in each level and discover the pattern in the number of edges.</p>
+            <p>Click two dots to connect them. Connect all pairs without duplicates. Then, answer about the edges!</p>
+            <p>Success criteria: Complete the graph correctly and identify the edge count.</p>
+            <button id="start">Start Adventure!</button>
+        </div>
+        <div id="game">
+            <div id="level">Level 1: 3 Dots</div>
+            <progress id="progress" value="0" max="3"></progress>
+            <svg id="graph" role="img" aria-label="Graph drawing area">
+                <!-- Vertices and edges will be added dynamically -->
+            </svg>
+            <div id="instructions">Click two dots to connect them. Connect all pairs!</div>
+            <div id="feedback"></div>
+            <button id="next" disabled>Next Challenge</button>
+            <button id="replay" style="display:none;">Replay Level</button>
+        </div>
+        <div id="quiz">
+            <h2 id="quizTitle">Great job connecting! Now, how many edges are there?</h2>
+            <p id="quizPrompt">For this complete graph with <span id="nValue"></span> vertices:</p>
+            <input type="number" id="edgeInput" placeholder="Enter number" min="0">
+            <div id="options" style="display:none;">
+                <!-- Multiple choice for pattern if needed -->
+            </div>
+            <button id="submitQuiz">Check Answer</button>
+            <div id="quizFeedback"></div>
+        </div>
+        <div id="summary" style="display:none;">
+            <h1>Congratulations! You Mastered Complete Graphs!</h1>
+            <p>You completed all levels. The pattern: A complete graph K<sub>n</sub> has exactly <strong>n(n-1)/2</strong> edges. Every vertex connects to all others!</p>
+            <p>This builds toward describing general graph patterns.</p>
+            <button id="replayAll">Play Again</button>
+        </div>
+    </div>
+    <script>
+        // Core game state
+        const levels = [3, 4, 5]; // n values for progressive difficulty
+        let currentLevel = 0;
+        let vertices = [];
+        let connections = new Set();
+        let selectedVertex = null;
+        let audioContext = null;
+        let graphSVG = null;
+        let gameDiv = null;
+        let quizDiv = null;
+        let welcomeDiv = null;
+        let summaryDiv = null;
+        // Initialize audio for feedback (graceful degradation)
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        function playSound(frequency, duration = 0.2) {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        // Play connect sound (higher pitch for success)
+        function playConnectSound(success = true) {
+            playSound(success ? 800 : 400, 0.1);
+        }
+        // Play success sound
+        function playSuccessSound() {
+            playSound(600, 0.3);
+            setTimeout(() => playSound(800, 0.3), 150);
+        }
+        // Generate positions for vertices in a circle
+        function generatePositions(n, width, height) {
+            const cx = width / 2;
+            const cy = height / 2;
+            const radius = Math.min(width, height) * 0.4;
+            const positions = [];
+            for (let i = 0; i < n; i++) {
+                const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+                positions.push({
+                    x: cx + radius * Math.cos(angle),
+                    y: cy + radius * Math.sin(angle)
+                });
+            }
+            return positions;
+        }
+        // Clear graph
+        function clearGraph() {
+            const svg = document.getElementById('graph');
+            svg.innerHTML = '';
+            vertices = [];
+            connections.clear();
+            selectedVertex = null;
+        }
+        // Create vertices
+        function createVertices(n) {
+            const svg = document.getElementById('graph');
+            const rect = svg.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const positions = generatePositions(n, width, height);
+            positions.forEach((pos, i) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', pos.x);
+                circle.setAttribute('cy', pos.y);
+                circle.setAttribute('r', 10);
+                circle.setAttribute('fill', '#2196F3');
+                circle.setAttribute('class', 'vertex');
+                circle.setAttribute('id', `v${i}`);
+                circle.setAttribute('tabindex', '0');
+                circle.setAttribute('role', 'button');
+                circle.setAttribute('aria-label', `Vertex ${i + 1}`);
+                circle.addEventListener('click', (e) => handleVertexClick(e, i));
+                circle.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        handleVertexClick(e, i);
+                        e.preventDefault();
+                    }
+                });
+                svg.appendChild(circle);
+                vertices.push({ element: circle, index: i, x: pos.x, y: pos.y });
+            });
+        }
+        // Handle vertex click for connection
+        function handleVertexClick(event, index) {
+            event.preventDefault();
+            if (selectedVertex === null) {
+                selectedVertex = index;
+                vertices[index].element.classList.add('pulse');
+                document.getElementById('feedback').textContent = `Selected vertex ${index + 1}. Click another!`;
+                playConnectSound();
+                return;
+            }
+            if (index === selectedVertex) {
+                // Deselect
+                vertices[selectedVertex].element.classList.remove('pulse');
+                selectedVertex = null;
+                document.getElementById('feedback').textContent = '';
+                return;
+            }
+            // Try to connect
+            const pair = new Set([selectedVertex, index]);
+            const pairKey = [...pair].sort().join('-');
+            if (connections.has(pairKey)) {
+                document.getElementById('feedback').textContent = 'Already connected! Choose different dots.';
+                playConnectSound(false);
+                return;
+            }
+            // Add connection
+            connections.add(pairKey);
+            drawEdge(selectedVertex, index);
+            vertices[selectedVertex].element.classList.remove('pulse');
+            selectedVertex = null;
+            document.getElementById('feedback').textContent = `Connected! ${connections.size} edges added.`;
+            playConnectSound(true);
+            // Check if complete
+            const n = levels[currentLevel];
+            const totalEdges = n * (n - 1) / 2;
+            if (connections.size === totalEdges) {
+                completeGraph();
+            }
+        }
+        // Draw edge
+        function drawEdge(i, j) {
+            const svg = document.getElementById('graph');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', vertices[i].x);
+            line.setAttribute('y1', vertices[i].y);
+            line.setAttribute('x2', vertices[j].x);
+            line.setAttribute('y2', vertices[j].y);
+            line.setAttribute('class', 'edge complete');
+            line.setAttribute('aria-hidden', 'true');
+            svg.appendChild(line);
+        }
+        // Celebrate completion
+        function completeGraph() {
+            document.getElementById('instructions').textContent = 'Graph complete! 🎉';
+            document.getElementById('next').disabled = false;
+            vertices.forEach(v => v.element.classList.add('pulse'));
+            playSuccessSound();
+            document.getElementById('feedback').textContent = 'Perfect! Now answer the quiz.';
+            // Assessment: Check connections implicitly by count
+        }
+        // Start level
+        function startLevel() {
+            clearGraph();
+            const n = levels[currentLevel];
+            createVertices(n);
+            document.getElementById('level').textContent = `Level ${currentLevel + 1}: ${n} Dots`;
+            document.getElementById('instructions').textContent = 'Click two dots to connect them. Connect all pairs!';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next').disabled = true;
+            document.getElementById('replay').style.display = 'none';
+            document.getElementById('progress').value = currentLevel;
+            gameDiv.style.display = 'block';
+            quizDiv.style.display = 'none';
+        }
+        // Show quiz
+        function showQuiz() {
+            gameDiv.style.display = 'none';
+            quizDiv.style.display = 'block';
+            const n = levels[currentLevel];
+            document.getElementById('nValue').textContent = n;
+            document.getElementById('quizTitle').textContent = `Great job on K_${n}! How many edges?`;
+            document.getElementById('quizPrompt').textContent = `A complete graph K_${n} connects every pair of ${n} vertices. Count the edges!`;
+            document.getElementById('edgeInput').value = '';
+            document.getElementById('quizFeedback').textContent = '';
+            document.getElementById('options').style.display = 'none'; // For now, input only; later levels could add choices
+            // For progressive: Level 2+ hint pattern
+            if (currentLevel > 0) {
+                const prevN = levels[currentLevel - 1];
+                const prevEdges = prevN * (prevN - 1) / 2;
+                document.getElementById('quizPrompt').innerHTML += `<br><small>Previous: K_${prevN} had ${prevEdges} edges. What's the pattern?</small>`;
+            }
+        }
+        // Submit quiz
+        document.getElementById('submitQuiz').addEventListener('click', () => {
+            const input = document.getElementById('edgeInput');
+            const n = levels[currentLevel];
+            const correct = n * (n - 1) / 2;
+            const answer = parseInt(input.value);
+            const feedback = document.getElementById('quizFeedback');
+            if (answer === correct) {
+                feedback.innerHTML = `<span style="color:green;">Correct! 🎉 K_${n} has ${correct} edges.</span>`;
+                playSuccessSound();
+                if (currentLevel < levels.length - 1) {
+                    feedback.innerHTML += '<br><button id="nextLevel">Next Level</button>';
+                    document.getElementById('nextLevel').addEventListener('click', nextLevel);
+                } else {
+                    feedback.innerHTML += '<br><button id="finish">Finish Game</button>';
+                    document.getElementById('finish').addEventListener('click', showSummary);
+                }
+            } else {
+                feedback.innerHTML = `<span style="color:red;">Not quite. Try again! Hint: ${n} vertices, each connects to ${n-1} others, but divide by 2 (no duplicates).</span>`;
+                playConnectSound(false);
+                input.focus();
+            }
+        });
+        function nextLevel() {
+            currentLevel++;
+            startLevel();
+            quizDiv.style.display = 'none';
+        }
+        function showSummary() {
+            quizDiv.style.display = 'none';
+            summaryDiv.style.display = 'block';
+        }
+        // Event listeners
+        document.getElementById('start').addEventListener('click', () => {
+            welcomeDiv.style.display = 'none';
+            initAudio();
+            startLevel();
+        });
+        document.getElementById('next').addEventListener('click', showQuiz);
+        document.getElementById('replay').addEventListener('click', () => {
+            startLevel();
+        });
+        document.getElementById('replayAll').addEventListener('click', () => {
+            currentLevel = 0;
+            summaryDiv.style.display = 'none';
+            welcomeDiv.style.display = 'block';
+        });
+        // Resize handler for responsive
+        window.addEventListener('resize', () => {
+            if (currentLevel >= 0 && gameDiv.style.display !== 'none') {
+                clearGraph();
+                createVertices(levels[currentLevel]);
+                // Redraw existing connections
+                connections.forEach(key => {
+                    const [i, j] = key.split('-').map(Number);
+                    draw

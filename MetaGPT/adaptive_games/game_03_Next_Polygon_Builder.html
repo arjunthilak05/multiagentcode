@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Polygon Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #container {
+            max-width: 800px;
+            width: 100%;
+            padding: 1em;
+            box-sizing: border-box;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        header h1 {
+            color: #4a90e2;
+            margin: 0;
+        }
+        .screen {
+            display: block;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        #progress {
+            font-size: 1.2em;
+            margin-bottom: 1em;
+            color: #4a90e2;
+        }
+        #sequence {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 1em 0;
+            flex-wrap: wrap;
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 1em 0;
+        }
+        #sequence > svg {
+            flex-shrink: 0;
+            margin: 0 0.5em;
+            transition: transform 0.3s ease;
+        }
+        #sequence > div {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.5em;
+            background-color: white;
+        }
+        #next-area {
+            margin: 1em 0;
+        }
+        #options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1em 0;
+        }
+        #options button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 80px;
+            transition: background-color 0.3s ease;
+        }
+        #options button:hover, #options button:focus {
+            background-color: #357abd;
+            outline: 2px solid #4a90e2;
+        }
+        #options button.selected {
+            background-color: #7fbfff;
+        }
+        #preview {
+            margin: 1em auto;
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+        #msg {
+            min-height: 2em;
+            font-size: 1.2em;
+            margin: 1em 0;
+            padding: 0.5em;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            color: red;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5em;
+            transition: background-color 0.3s ease;
+        }
+        button:hover, button:focus {
+            background-color: #357abd;
+            outline: 2px solid #4a90e2;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #welcome p, #end p {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        @media (max-width: 600px) {
+            #sequence {
+                flex-direction: column;
+            }
+            #options {
+                flex-direction: column;
+                align-items: center;
+            }
+            #options button {
+                width: 80%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>Next Polygon Builder</h1>
+            <p>Game 3 of 10: Regular Polygon Sequences</p>
+        </header>
+        <main id="game">
+            <div id="welcome" class="screen">
+                <h2>Welcome!</h2>
+                <p>Learning Objective: Understand regular polygon sequences by recognizing that each next polygon adds one more side.</p>
+                <p>Instructions: Observe the sequence of regular polygons (shapes with equal sides and angles). The pattern is adding one side each time. Select the correct number of sides for the next polygon. Preview it, then submit. Get it right to advance!</p>
+                <p>Success Criteria: Correctly identify the next number of sides in the sequence.</p>
+                <button id="start">Start Game</button>
+            </div>
+            <div id="level" class="screen hidden">
+                <div id="progress">Level <span id="current-level">1</span> of 5</div>
+                <div id="sequence"></div>
+                <div id="next-area">
+                    <p>Choose the number of sides for the next polygon:</p>
+                    <div id="options"></div>
+                    <div id="preview"></div>
+                </div>
+                <div id="msg"></div>
+                <button id="submit" disabled>Choose the number of sides</button>
+            </div>
+            <div id="end" class="screen hidden">
+                <h2>Congratulations!</h2>
+                <p>You mastered regular polygon sequences! Each polygon adds one side to the previous one. Great job building patterns!</p>
+                <button id="replay">Play Again</button>
+            </div>
+        </main>
+    </div>
+    <script>
+        let currentLevel = 0;
+        let selected = null;
+        let levels = [
+            {prev: [3, 4], next: 5, options: [4, 5, 6]},
+            {prev: [4, 5], next: 6, options: [5, 6, 7]},
+            {prev: [3, 4, 5], next: 6, options: [5, 6, 7]},
+            {prev: [5, 6, 7], next: 8, options: [7, 8, 9]},
+            {prev: [3, 4, 5, 6], next: 7, options: [5, 6, 7, 8]}
+        ];
+        function createPolygon(sides, size = 120) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '-1.2 -1.2 2.4 2.4');
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-label', sides + ' sided regular polygon');
+            const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            let points = [];
+            for (let i = 0; i < sides; i++) {
+                let angle = (2 * Math.PI * i / sides) - (Math.PI / 2);
+                let x = Math.cos(angle);
+                let y = Math.sin(angle);
+                points.push(x + ',' + y);
+            }
+            poly.setAttribute('points', points.join(' '));
+            poly.setAttribute('fill', 'none');
+            poly.setAttribute('stroke', 'black');
+            poly.setAttribute('stroke-width', '0.05');
+            svg.appendChild(poly);
+            return svg;
+        }
+        function updatePreview(sides) {
+            const prevDiv = document.getElementById('preview');
+            prevDiv.innerHTML = '';
+            if (sides) {
+                const poly = createPolygon(sides, 150);
+                prevDiv.appendChild(poly);
+            }
+        }
+        function selectOption(sides) {
+            selected = sides;
+            // Clear previous selections
+            document.querySelectorAll('#options button').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            updatePreview(sides);
+            const submitBtn = document.getElementById('submit');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+        }
+        function showLevel() {
+            const level = levels[currentLevel];
+            const seqDiv = document.getElementById('sequence');
+            seqDiv.innerHTML = '';
+            level.prev.forEach(sides => {
+                const poly = createPolygon(sides);
+                seqDiv.appendChild(poly);
+            });
+            // Placeholder for next
+            const nextDiv = document.createElement('div');
+            nextDiv.innerHTML = '?';
+            nextDiv.style.fontSize = '3em';
+            nextDiv.style.fontWeight = 'bold';
+            nextDiv.style.color = '#4a90e2';
+            seqDiv.appendChild(nextDiv);
+            const optsDiv = document.getElementById('options');
+            optsDiv.innerHTML = '';
+            level.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt + ' sides';
+                btn.onclick = (e) => selectOption(opt, e);
+                btn.setAttribute('aria-label', 'Select ' + opt + ' sided polygon');
+                optsDiv.appendChild(btn);
+            });
+            updatePreview(null);
+            selected = null;
+            const submitBtn = document.getElementById('submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Choose the number of sides';
+            document.getElementById('current-level').textContent = currentLevel + 1;
+            document.getElementById('msg').innerHTML = '';
+            document.getElementById('msg').className = '';
+        }
+        function playSound(frequency, duration) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                oscillator.connect(audioCtx.destination);
+                oscillator.start();
+                setTimeout(() => oscillator.stop(), duration);
+            } catch (e) {
+                // Graceful degradation: no sound
+            }
+        }
+        function showFeedback(msg, isSuccess) {
+            const msgDiv = document.getElementById('msg');
+            msgDiv.innerHTML = msg;
+            msgDiv.className = isSuccess ? 'success' : 'error';
+        }
+        function submitAnswer() {
+            if (selected === null) {
+                showFeedback('Please select an option first.', false);
+                return;
+            }
+            const level = levels[currentLevel];
+            const prevDiv = document.getElementById('preview');
+            if (selected === level.next) {
+                playSound(800, 200);
+                prevDiv.style.transform = 'scale(1.1)';
+                setTimeout(() => prevDiv.style.transform = 'scale(1)', 300);
+                showFeedback('Correct! The next polygon has ' + selected + ' sides. The rule is adding one side each time. Great job!', true);
+                setTimeout(() => {
+                    currentLevel++;
+                    if (currentLevel < levels.length) {
+                        showLevel();
+                    } else {
+                        document.getElementById('level').classList.add('hidden');
+                        document.getElementById('end').classList.remove('hidden');
+                    }
+                }, 2000);
+            } else {
+                playSound(400, 200);
+                prevDiv.style.transform = 'scale(0.9)';
+                setTimeout(() => prevDiv.style.transform = 'scale(1)', 300);
+                showFeedback('Not quite right. Remember, each polygon adds one more side to the previous one. Try again!', false);
+                selected = null;
+                updatePreview(null);
+                document.getElementById('submit').disabled = true;
+                document.getElementById('submit').textContent = 'Choose the number of sides';
+                // Clear selection
+                document.querySelectorAll('#options button').forEach(btn => btn.classList.remove('selected'));
+            }
+        }
+        function startGame() {
+            document.getElementById('welcome').classList.add('hidden');
+            document.getElementById('level').classList.remove('hidden');
+            currentLevel = 0;
+            showLevel();
+        }
+        function replay() {
+            document.getElementById('end').classList.add('hidden');
+            document.getElementById('level').classList.remove('hidden');
+            currentLevel = 0;
+            showLevel();
+        }
+        // Event listeners
+        document.getElementById('start').addEventListener('click', startGame);
+        document.getElementById('replay').addEventListener('click', replay);
+        document.getElementById('submit').addEventListener('click', submitAnswer);
+        // Keyboard support for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('submit').disabled) {
+                submitAnswer();
+            }
+        });
+        // Error handling: If JS fails, show basic message
+        window.addEventListener('error', (e) => {
+            console.error(e);
+            document.body.innerHTML = '<p>Sorry, something went wrong. Please refresh the page.</p>';
+        });
+    </script>
+</body>
+</html>
