@@ -1,155 +1,258 @@
-# Multi-Agent System with MetaGPT
+# 🎮 Adaptive Multi-Agent Educational Game Generator
 
-A comprehensive multi-agent system built with MetaGPT featuring automated audiobook generation, adaptive game creation, and intelligent agent coordination.
+**Transform any textbook content into interactive HTML5 games using AI-powered multi-agent systems**
 
-## 🚀 Features
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![MetaGPT](https://img.shields.io/badge/MetaGPT-Framework-green.svg)](https://github.com/geekan/MetaGPT)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- **Automated Audiobook System**: Fully automated multi-agent audiobook generation with LangGraph Swarm technology
-- **Adaptive Game Generator**: AI-powered educational game creation with progressive difficulty
-- **Multi-Agent Coordination**: Seamless agent-to-agent communication and task handoff
-- **Station-Based Architecture**: Modular design with Station 1 (content generation) and Station 2 (processing)
-- **Interactive CLI**: Command-line interfaces for testing and manual operation
+## 🌟 What This Does
+
+This system analyzes educational content and automatically generates the **perfect number** of interactive games needed to teach it completely. No more guessing - pure AI-driven educational design!
+
+## 🚀 Key Features
+
+- 🧠 **AI Content Analysis** - Determines optimal learning structure automatically
+- 🎯 **Adaptive Game Count** - 3-15 games based on content complexity  
+- 🎮 **Complete HTML5 Games** - Self-contained, mobile-responsive educational games
+- 📊 **Learning Analytics** - Detailed educational insights and progress tracking
+- 🤖 **Multi-Agent Architecture** - Specialized AI agents working together
+- 🚀 **Zero Dependencies** - Games work anywhere, no external files needed
+- ⚡ **Fast Generation** - Complete learning portal in minutes
 
 ## 📋 Prerequisites
 
-- Python 3.8+
-- Git
-- OpenAI API key (for MetaGPT functionality)
+```bash
+# Check Python version (3.8+ required)
+python --version
 
-## 🛠️ Installation
+# Install Git if needed
+git --version
+```
 
-### 1. Clone the Repository
+## 🚀 Quick Start
+
+### 1. Clone & Setup
 
 ```bash
+# Clone this repository
 git clone https://github.com/arjunthilak05/multiagentcode.git
 cd multiagentcode
+
+# Clone MetaGPT framework (required dependency)
+git clone https://github.com/geekan/MetaGPT.git
+cd MetaGPT
+pip install -e .
+cd ..
 ```
 
 ### 2. Install Dependencies
 
 ```bash
-# Install MetaGPT and dependencies
-pip install -r MetaGPT/requirements.txt
+# Core dependencies
+pip install metagpt openai
 
-# Install additional dependencies for the multi-agent system
-pip install langgraph langchain openai
+# Additional requirements for multi-agent features
+pip install langgraph langchain
 ```
 
-### 3. Configure MetaGPT
+### 3. Configure API
 
-```bash
-cd MetaGPT
-cp config/config2.example.yaml config/config2.yaml
-```
-
-Edit `config/config2.yaml` and add your OpenAI API key:
+Edit `MetaGPT/config/config2.yaml`:
 
 ```yaml
-OPENAI_API_KEY: "your-api-key-here"
+llm:
+  api_type: "openai"
+  model: "x-ai/grok-4-fast:free"  # Free tier available!
+  base_url: "https://openrouter.ai/api/v1"
+  api_key: "YOUR_API_KEY_HERE"    # Get from https://openrouter.ai
 ```
 
-## 🎮 Usage
+**Get Free API Key:**
+1. Visit [OpenRouter.ai](https://openrouter.ai) 
+2. Sign up (free tier available)
+3. Copy API key to config above
 
-### Automated Audiobook System
-
-Run the fully automated multi-agent audiobook system:
+### 4. Run the System
 
 ```bash
-python automated_runner.py
+# Add your educational content
+echo "Your textbook content here..." > "MetaGPT/extract (1).txt"
+
+# Generate adaptive games
+cd MetaGPT
+python adaptive_game_generator.py
+
+# Open the learning portal
+open adaptive_games/index.html
 ```
 
-### Testing and Development
+## 🎮 Usage Examples
 
-**Test the entire system:**
+### Basic Game Generation
+
 ```bash
+# Simple content example
+echo "Geometry: Learn about triangles, squares, and circles." > "MetaGPT/extract (1).txt"
+
+# Run the adaptive system
+cd MetaGPT
+python adaptive_game_generator.py
+
+# Result: 3-5 games automatically generated!
+```
+
+### Advanced Usage
+
+```python
+from MetaGPT.adaptive_game_generator import AdaptiveGameSystem
+
+# Initialize system
+system = AdaptiveGameSystem()
+
+# Generate games from your content
+await system.generate_adaptive_games(
+    content_file="extract (1).txt",
+    output_dir="my_custom_games"
+)
+```
+
+### Multi-Agent System (MetaGPT Framework)
+
+```bash
+# Run the proper MetaGPT multi-agent version
+cd MetaGPT
+python multi_agent_game_system.py \
+  --content_file="extract (1).txt" \
+  --output_dir="multi_agent_games" \
+  --n_rounds=4
+```
+
+### Testing the System
+
+```bash
+# Test core functionality
 python test_stations.py
-```
 
-**Test automation:**
-```bash
+# Test automation features  
 python test_automated_swarm.py
-# or
+
+# Demo the complete system
 python demo_automated_system.py
 ```
 
-**Run individual stations:**
-```bash
-# Station 1 (Content Generation)
-python station1_cli.py
+## 🏗️ System Architecture
 
-# Station 2 (Processing)
-python station2_cli.py
+### Multi-Agent Pipeline
+
+```mermaid
+graph LR
+    A[📄 Content File] --> B[🔍 AI Analysis]
+    B --> C[🎯 Game Planning]
+    C --> D[🎮 Game Generation]
+    D --> E[🌐 Learning Portal]
 ```
 
-### Adaptive Game Generation
+### Core Components
 
-Generate educational games with progressive difficulty:
-
-```bash
-cd MetaGPT
-python adaptive_game_generator.py
+```python
+AdaptiveGameSystem           # 🎯 Main orchestrator
+├── AdaptiveContentAnalyzer  # 🔍 AI content analysis  
+├── EnhancedGameGenerator    # 🎮 AI game creation
+└── FixedCodeCleaner        # 🧹 HTML validation
 ```
 
-## 🏗️ Architecture
+### Key Features
 
-### Station-Based Design
+- **Content Analysis**: AI determines optimal learning structure
+- **Adaptive Planning**: Dynamic game count (3-15) based on complexity
+- **Game Generation**: Complete HTML5 games with embedded CSS/JS
+- **Quality Assurance**: Multi-layer validation and error recovery
+- **Portal Creation**: Beautiful learning dashboard with analytics
 
-- **Station 1**: Content generation and initial processing
-- **Station 2**: Advanced processing and output generation
-- **Automated Runner**: Coordinates seamless Station 1 → Station 2 execution
+## 🎯 Sample Results
 
-### Key Components
+### Input: Grade 6 Geometry Patterns
+```
+Content: "Patterns in shapes, polygons, sequences..."
+Length: 2,500 words
+```
 
-- `automated_runner.py`: Main automation orchestrator
-- `station1_cli.py`: Station 1 command-line interface
-- `station2_cli.py`: Station 2 command-line interface
-- `test_stations.py`: Comprehensive system testing
-- `MetaGPT/`: MetaGPT framework and adaptive game generator
+### AI Analysis Output:
+```json
+{
+  "optimal_game_count": 10,
+  "total_concepts": 7,
+  "complexity_breakdown": {
+    "simple": 2,
+    "medium": 3, 
+    "complex": 2
+  },
+  "estimated_learning_time": "60 minutes"
+}
+```
 
-## 🎯 Generated Content
-
-The system generates:
-
-- **Audiobooks**: Automated multi-agent audiobook creation
-- **Educational Games**: Progressive HTML5 games with adaptive difficulty
-- **Interactive Content**: Engaging learning experiences
+### Generated Games:
+1. 🔍 **Shape Basics Explorer** (Very Easy)
+2. 🔺 **Polygon Pattern Spotter** (Easy)  
+3. 🏗️ **Next Polygon Builder** (Medium)
+4. 🕸️ **Graph Connection Challenge** (Easy)
+5. 🎯 **Connect the Dots Graph** (Medium)
+6. 📦 **Square Stack Puzzle** (Easy)
+7. 🏗️ **Build Bigger Squares** (Medium)
+8. 🔺 **Triangle Stack Adventure** (Medium)
+9. ❄️ **Snowflake Fractal Journey** (Hard)
+10. 🧠 **Pattern Rule Master** (Very Hard)
 
 ## 📁 Project Structure
 
 ```
 multiagentcode/
-├── automated_runner.py          # Main automation orchestrator
-├── station1_cli.py             # Station 1 CLI
-├── station2_cli.py             # Station 2 CLI
-├── test_stations.py            # System testing
-├── test_automated_swarm.py     # Automation testing
-├── demo_automated_system.py    # Demo system
-├── MetaGPT/                    # MetaGPT framework
-│   ├── adaptive_game_generator.py
-│   ├── adaptive_games/         # Generated games
-│   ├── config/                 # Configuration files
-│   └── requirements.txt
-└── README.md
+├── README.md                       # 📖 You are here!
+├── automated_runner.py             # 🤖 Main automation orchestrator
+├── station1_cli.py                # 🎮 Station 1 CLI
+├── station2_cli.py                # 🎮 Station 2 CLI  
+├── test_stations.py               # 🧪 System testing
+├── test_automated_swarm.py        # 🧪 Automation testing
+├── demo_automated_system.py       # 🎬 Demo system
+└── MetaGPT/                       # 🎯 Core game generator
+    ├── adaptive_game_generator.py  # 🎮 Main adaptive system
+    ├── fixed_code_cleaner.py      # 🧹 HTML validator
+    ├── multi_agent_game_system.py # 🤖 MetaGPT framework version
+    ├── extract (1).txt            # 📖 Your content file
+    ├── config/
+    │   └── config2.yaml           # ⚙️ API configuration
+    └── adaptive_games/            # 📁 Generated output
+        ├── index.html             # 🌟 Learning portal
+        ├── game_01_*.html         # 🎮 Individual games
+        └── analysis_report.json   # 📊 Analytics
 ```
 
 ## 🔧 Configuration
 
-### MetaGPT Configuration
+### API Configuration
 
 Edit `MetaGPT/config/config2.yaml`:
 
 ```yaml
-OPENAI_API_KEY: "your-openai-api-key"
-MODEL: "gpt-4"  # or your preferred model
+llm:
+  api_type: "openai"
+  model: "x-ai/grok-4-fast:free"     # Free tier model
+  base_url: "https://openrouter.ai/api/v1"
+  api_key: "sk-or-v1-..."           # Your OpenRouter API key
 ```
 
-### System Configuration
+### Supported Models
+- `x-ai/grok-4-fast:free` (Recommended - free tier)
+- `openai/gpt-4` (High quality, paid)
+- `openai/gpt-3.5-turbo` (Fast, affordable)
+- `anthropic/claude-3` (Alternative provider)
 
-The system uses environment variables and configuration files for:
-- API keys and authentication
-- Model selection and parameters
-- Output directories and file paths
-- Agent coordination settings
+### System Settings
+- **Content Analysis**: Automatic complexity detection
+- **Game Count**: 3-15 games (auto-determined)  
+- **Output Format**: HTML5 with embedded CSS/JS
+- **Quality Assurance**: Multi-layer validation
 
 ## 🧪 Testing
 
